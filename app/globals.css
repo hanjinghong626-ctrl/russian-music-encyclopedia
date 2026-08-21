@@ -1,0 +1,481 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ========== HERO - Moscow Oil Painting ========== */
+.hero-moscow {
+  position: relative;
+  height: 100vh;
+  min-height: 600px;
+  overflow: hidden;
+}
+
+.hero-image-wrapper {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.hero-image-wrapper img,
+.hero-image-wrapper > span {
+  animation: kenBurns 25s ease-in-out infinite alternate;
+}
+
+@keyframes kenBurns {
+  0% { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.08) translate(-1%, -1.5%); }
+}
+
+/* Overlay: centered text area with radial darkening for readability */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 38%, rgba(15, 23, 42, 0.45) 0%, transparent 70%),
+    linear-gradient(
+      to bottom,
+      rgba(15, 23, 42, 0.15) 0%,
+      rgba(15, 23, 42, 0.30) 25%,
+      rgba(15, 23, 42, 0.35) 40%,
+      rgba(15, 23, 42, 0.25) 55%,
+      rgba(15, 23, 42, 0.55) 75%,
+      rgba(15, 23, 42, 0.78) 100%
+    );
+}
+
+/* Floating light particles */
+
+/* ====== 浮光跃金 - 精致光束动画 ====== */
+.hero-light-beams {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* --- 光束基础：梯形，上窄下宽 --- */
+.light-beam {
+  position: absolute;
+  top: -8%;
+  transform-origin: top center;
+  animation: beamBreath ease-in-out infinite;
+}
+
+/* 外层散射光 - 大范围柔光 */
+.light-beam .beam-outer {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(38% 0%, 62% 0%, 100% 100%, 0% 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 235, 170, 0.22) 0%,
+    rgba(255, 215, 100, 0.12) 30%,
+    rgba(255, 200, 80, 0.05) 60%,
+    transparent 100%
+  );
+  filter: blur(30px);
+}
+
+/* 中层主体光束 */
+.light-beam .beam-core {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(42% 0%, 58% 0%, 85% 100%, 15% 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 240, 190, 0.30) 0%,
+    rgba(255, 220, 120, 0.18) 25%,
+    rgba(255, 205, 90, 0.08) 55%,
+    transparent 90%
+  );
+  filter: blur(12px);
+}
+
+/* 内层高亮核心 - 最亮最窄 */
+.light-beam .beam-highlight {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(46% 0%, 54% 0%, 70% 100%, 30% 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 250, 220, 0.35) 0%,
+    rgba(255, 235, 160, 0.15) 35%,
+    transparent 75%
+  );
+  filter: blur(6px);
+}
+
+/* 底部散射光晕 */
+.light-beam .beam-glow {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140%;
+  height: 25%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 220, 120, 0.10) 0%,
+    rgba(255, 200, 80, 0.04) 50%,
+    transparent 80%
+  );
+  filter: blur(20px);
+}
+
+/* 光束内漂浮光尘 */
+.light-beam .beam-dust {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 235, 170, 0.9) 0%, rgba(255, 220, 120, 0.3) 50%, transparent 80%);
+  animation: dustFloat linear infinite;
+}
+
+/* --- 左侧光束 --- */
+.light-beam-left {
+  left: 18%;
+  width: 220px;
+  height: 80%;
+  transform: rotate(-18deg);
+  animation-duration: 7s;
+  animation-delay: 0s;
+}
+
+/* --- 右侧光束 --- */
+.light-beam-right {
+  left: 55%;
+  width: 260px;
+  height: 78%;
+  transform: rotate(-10deg);
+  animation-duration: 8.5s;
+  animation-delay: 2s;
+}
+
+/* 光束呼吸动画 - 包含轻微摇摆 */
+@keyframes beamBreath {
+  0%, 100% {
+    opacity: 0.25;
+    transform: rotate(var(--beam-base-rotate, -15deg)) scaleX(0.9);
+  }
+  25% {
+    opacity: 0.7;
+    transform: rotate(calc(var(--beam-base-rotate, -15deg) + 0.8deg)) scaleX(1.05);
+  }
+  50% {
+    opacity: 0.4;
+    transform: rotate(calc(var(--beam-base-rotate, -15deg) - 0.5deg)) scaleX(0.97);
+  }
+  75% {
+    opacity: 0.85;
+    transform: rotate(calc(var(--beam-base-rotate, -15deg) + 0.3deg)) scaleX(1.1);
+  }
+}
+
+/* 光尘漂浮动画 */
+@keyframes dustFloat {
+  0%   { transform: translateY(0) translateX(0) scale(0.5); opacity: 0; }
+  15%  { opacity: 0.8; }
+  50%  { transform: translateY(-40px) translateX(12px) scale(1); opacity: 0.5; }
+  85%  { opacity: 0.7; }
+  100% { transform: translateY(-80px) translateX(-8px) scale(0.3); opacity: 0; }
+}
+
+/* 天空区域金色微光 overlay */
+.hero-golden-shimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 220, 100, 0.0) 0%,
+    rgba(255, 210, 80, 0.05) 30%,
+    rgba(255, 200, 60, 0.03) 60%,
+    rgba(255, 215, 90, 0.04) 100%
+  );
+  animation: shimmerDrift 14s ease-in-out infinite;
+  mix-blend-mode: soft-light;
+}
+
+@keyframes shimmerDrift {
+  0%, 100% { opacity: 0.3; transform: translateX(-3%); }
+  50%      { opacity: 0.7; transform: translateX(3%); }
+}
+
+.hero-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  animation: particleFloat linear infinite;
+  opacity: 0;
+}
+
+.particle:nth-child(1) { left: 8%;  width: 4px; height: 4px; background: rgba(255,255,255,0.35); animation-duration: 14s; animation-delay: 0s; }
+.particle:nth-child(2) { left: 18%; width: 6px; height: 6px; background: rgba(251,191,36,0.25); animation-duration: 18s; animation-delay: 3s; }
+.particle:nth-child(3) { left: 30%; width: 3px; height: 3px; background: rgba(255,255,255,0.3);  animation-duration: 12s; animation-delay: 1s; }
+.particle:nth-child(4) { left: 45%; width: 5px; height: 5px; background: rgba(255,255,255,0.2);  animation-duration: 16s; animation-delay: 5s; }
+.particle:nth-child(5) { left: 58%; width: 4px; height: 4px; background: rgba(251,191,36,0.2);  animation-duration: 13s; animation-delay: 2s; }
+.particle:nth-child(6) { left: 72%; width: 7px; height: 7px; background: rgba(255,255,255,0.15); animation-duration: 20s; animation-delay: 4s; }
+.particle:nth-child(7) { left: 85%; width: 3px; height: 3px; background: rgba(255,255,255,0.3);  animation-duration: 11s; animation-delay: 6s; }
+.particle:nth-child(8) { left: 92%; width: 5px; height: 5px; background: rgba(251,191,36,0.18); animation-duration: 15s; animation-delay: 1.5s; }
+.particle:nth-child(9) { left: 38%; width: 3px; height: 3px; background: rgba(255,255,255,0.25); animation-duration: 17s; animation-delay: 7s; }
+.particle:nth-child(10){ left: 65%; width: 4px; height: 4px; background: rgba(255,200,150,0.2);  animation-duration: 19s; animation-delay: 3.5s; }
+
+@keyframes particleFloat {
+  0%   { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 1; }
+  100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+}
+
+/* Hero text - centered */
+.hero-content {
+  position: relative;
+  z-index: 3;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-text-group {
+  max-width: 42rem;
+  text-align: center;
+  padding: 0 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .hero-text-group {
+    max-width: 100%;
+    padding: 0 1.25rem;
+  }
+}
+
+/* Staggered entrance */
+.hero-russian-title {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 0.95rem;
+  color: rgba(251, 191, 36, 0.85);
+  letter-spacing: 0.25em;
+  margin-bottom: 0.75rem;
+  font-style: italic;
+  opacity: 0;
+  animation: heroFadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+}
+
+.hero-main-title {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 2.75rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1.12;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  animation: heroFadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.65s forwards;
+}
+
+@media (min-width: 768px) {
+  .hero-main-title {
+    font-size: 3.5rem;
+  }
+}
+
+.hero-subtitle {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  animation: heroFadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.85s forwards;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: heroFadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 1.05s forwards;
+}
+
+/* Hero buttons centered */
+.hero-buttons {
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .hero-buttons {
+    justify-content: center;
+  }
+}
+
+@keyframes heroFadeUp {
+  0%   { opacity: 0; transform: translateY(28px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Hero buttons */
+.hero-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  font-weight: 600;
+  padding: 0.85rem 1.75rem;
+  border-radius: 9999px;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 24px rgba(245, 158, 11, 0.35);
+  font-size: 0.95rem;
+}
+
+.hero-btn-primary:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.5);
+  transform: translateY(-2px);
+}
+
+.hero-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  color: white;
+  font-weight: 500;
+  padding: 0.85rem 1.75rem;
+  border-radius: 9999px;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(6px);
+  font-size: 0.95rem;
+}
+
+.hero-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.55);
+  transform: translateY(-2px);
+}
+
+/* Scroll indicator */
+.scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  animation: scrollBounce 2s ease-in-out infinite;
+  opacity: 0;
+  animation: scrollBounce 2s ease-in-out infinite, heroFadeUp 0.8s ease-out 1.5s forwards;
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(8px); }
+}
+
+/* ========== NAVBAR ========== */
+.nav-hero-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  opacity: 0;
+  animation: fadeIn 1s ease-out 0.2s forwards;
+}
+
+.nav-scrolled {
+  background: rgba(15, 23, 42, 0.85) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ========== SCROLL REVEAL ========== */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* ========== SECTION CARDS ========== */
+.feature-card {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.12);
+}
+
+/* ========== GOLD SHIMMER TITLE ========== */
+.title-shimmer {
+  background: linear-gradient(90deg, #92400e 0%, #f59e0b 40%, #fbbf24 50%, #f59e0b 60%, #92400e 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ========== GENERAL ========== */
+@keyframes fadeIn {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Decorative line */
+.gold-divider {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #d97706, transparent);
+  margin: 0 auto;
+}
