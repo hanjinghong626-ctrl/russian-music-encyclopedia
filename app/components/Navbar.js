@@ -14,11 +14,11 @@ export default function Navbar() {
     <nav className={`site-nav ${scrolled ? 'scrolled' : ''}`}>
       <div className="nav-inner">
         <Link href="/" className="nav-brand">
-          <span className="nav-brand-cyr">Энциклопедия</span>
-          俄罗斯音乐百科
+          <span className="nav-brand-cyr">Словарь</span>
+          俄罗斯音乐辞典
         </Link>
         <div className="nav-links">
-          <Link href="/browse" className="nav-link">百科浏览</Link>
+          <Link href="/browse" className="nav-link">辞典浏览</Link>
           <Link href="/#paths" className="nav-link">学习路径</Link>
           <Link href="/browse?view=table" className="nav-link">术语表</Link>
         </div>
