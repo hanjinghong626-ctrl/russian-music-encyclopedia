@@ -1,5 +1,5 @@
 /* ============================================
-   RUSSIAN MUSIC ENCYCLOPEDIA — v3 Editorial
+   RUSSIAN MUSIC DICTIONARY — v3 Editorial
    ============================================ */
 
 :root {
@@ -147,7 +147,6 @@
 .hero-tag {
   font-family: var(--serif); font-size: 14px; font-style: italic;
   color: var(--muted); transition: color 0.25s;
-  position: relative;
 }
 .hero-tag:hover { color: var(--gold); }
 
@@ -192,19 +191,18 @@
 
 /* ---------- Category Grid ---------- */
 .cat-group-label {
-  font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--muted); font-weight: 400;
-  padding-bottom: 16px; margin-bottom: 8px;
+  font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--gold); font-weight: 400;
+  padding-bottom: 14px; margin-bottom: 4px;
   border-bottom: 1px solid var(--rule);
-  display: flex; align-items: center; gap: 8px;
+  font-family: var(--serif); font-style: italic;
 }
-.cat-group-label .cat-icon { font-size: 14px; }
-.cat-group + .cat-group { margin-top: 48px; }
+.cat-group + .cat-group { margin-top: 52px; }
 
 .cat-list { list-style: none; }
 .cat-item {
   display: flex; align-items: baseline; gap: 16px;
-  padding: 16px 0;
+  padding: 15px 0;
   border-bottom: 1px solid var(--rule);
   transition: padding-left 0.3s ease;
 }
@@ -212,7 +210,7 @@
 .cat-item:hover .cat-name { color: var(--gold); }
 .cat-num {
   font-family: var(--serif); font-size: 13px; font-style: italic;
-  color: var(--faint); min-width: 28px;
+  color: var(--muted); min-width: 28px;
 }
 .cat-name {
   font-size: 16px; font-weight: 300; letter-spacing: 0.06em;
@@ -228,7 +226,7 @@
 }
 .cat-count {
   font-family: var(--serif); font-size: 15px;
-  color: var(--muted); font-weight: 300;
+  color: var(--ink-soft); font-weight: 300;
 }
 
 /* ---------- Views ---------- */
