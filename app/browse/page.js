@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import '../glossary.css';
 
-export default function GlossaryPage() {
+function BrowseContent() {
   const [data, setData] = useState(null);
   const [entries, setEntries] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -620,5 +620,17 @@ export default function GlossaryPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function BrowsePage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant), serif', fontSize: '20px', color: '#7a7568' }}>
+        Загрузка…
+      </div>
+    }>
+      <BrowseContent />
+    </Suspense>
   );
 }
