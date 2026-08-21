@@ -1,11 +1,16 @@
 'use client';
-
 import { useState, useEffect, Suspense } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import '../../home.css';
+
+const levelLabels = {
+  beginner: { label: '入门', cyr: 'Начальный' },
+  intermediate: { label: '进阶', cyr: 'Средний' },
+  advanced: { label: '高级', cyr: 'Продвинутый' },
+};
 
 function PathDetailContent() {
   const params = useParams();
@@ -21,70 +26,78 @@ function PathDetailContent() {
   }, []);
 
   if (!data) {
-    return <div className="page-loading"><div className="page-loading-spinner" /><p>Загрузка…</p></div>;
+    return (
+      <div className="page-loading">
+        <div className="page-loading-spinner" />
+        <p>Загрузка…</p>
+      </div>
+    );
   }
 
-  const entryMap = {};
-  data.entries.forEach(e => { entryMap[e.id] = e; });
   const pathData = data.learning_paths[pathName];
-
   if (!pathData) {
     return (
       <>
         <Navbar />
-        <div className="path-not-found">
-          <h1>路径未找到</h1>
-          <Link href="/#paths">返回学习路径</Link>
-        </div>
+        <main className="pd-page">
+          <div className="pd-header">
+            <Link href="/" className="pd-breadcrumb">← 返回首页</Link>
+            <h1 className="pd-title">路径未找到</h1>
+            <p className="pd-cyr">Путь не найден</p>
+          </div>
+        </main>
         <Footer />
       </>
     );
   }
 
-  const levels = [
-    { key: 'beginner', label: '入门' },
-    { key: 'intermediate', label: '进阶' },
-    { key: 'advanced', label: '高级' },
-  ];
-  const currentEntries = (pathData[activeLevel] || []).map(id => entryMap[id]).filter(Boolean);
+  const entryIds = pathData[activeLevel] || [];
+  const currentEntries = entryIds
+    .map(id => data.entries.find(e => e.id === id))
+    .filter(Boolean);
 
   return (
     <>
       <Navbar />
-      <main className="path-detail">
-        <div className="path-detail-header">
-          <div className="container">
-            <Link href="/#paths" className="breadcrumb">← 返回学习路径</Link>
-            <h1 className="path-detail-title">{pathName}</h1>
-            <p className="path-detail-subtitle">
-              {(pathData.beginner||[]).length} 入门 · {(pathData.intermediate||[]).length} 进阶 · {(pathData.advanced||[]).length} 高级
-            </p>
-          </div>
+      <main className="pd-page">
+        <div className="pd-header">
+          <Link href="/" className="pd-breadcrumb">← Энциклопедия</Link>
+          <h1 className="pd-title">{pathName}</h1>
+          <p className="pd-cyr">Учебный путь</p>
         </div>
-        <div className="path-detail-body container">
-          <div className="path-level-tabs">
-            {levels.map(lv => (
-              <button key={lv.key}
-                className={`path-tab ${activeLevel === lv.key ? 'active' : ''}`}
-                onClick={() => setActiveLevel(lv.key)}>
-                <span className="path-tab-label">{lv.label}</span>
-                <span className="path-tab-count">{(pathData[lv.key]||[]).length}</span>
+
+        <div className="pd-body">
+          <div className="pd-tabs">
+            {Object.entries(levelLabels).map(([key, { label, cyr }]) => (
+              <button
+                key={key}
+                className={`pd-tab${activeLevel === key ? ' active' : ''}`}
+                onClick={() => setActiveLevel(key)}
+              >
+                {label}
+                <span className="pd-tab-count">
+                  {pathData[key]?.length || 0}
+                </span>
               </button>
             ))}
           </div>
-          <div className="path-entries">
-            {currentEntries.map((entry, i) => (
-              <Link key={entry.id} href={`/browse?q=${encodeURIComponent(entry.zh)}`} className="path-entry">
-                <span className="path-entry-num">{String(i + 1).padStart(2, '0')}</span>
-                <div className="path-entry-content">
-                  <span className="path-entry-zh">{entry.zh}</span>
-                  {entry.ru && <span className="path-entry-ru">{entry.ru}</span>}
-                </div>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="path-entry-arrow">
-                  <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </Link>
-            ))}
+
+          <div className="pd-entries">
+            {currentEntries.length === 0 ? (
+              <p className="pd-empty">本阶段暂无词条</p>
+            ) : (
+              currentEntries.map((entry, i) => (
+                <Link
+                  key={entry.id}
+                  href={`/browse?q=${encodeURIComponent(entry.zh)}`}
+                  className="pd-entry"
+                >
+                  <span className="pd-entry-num">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="pd-entry-zh">{entry.zh}</span>
+                  <span className="pd-entry-ru">{entry.ru}</span>
+                </Link>
+              ))
+            )}
           </div>
         </div>
       </main>
@@ -96,8 +109,9 @@ function PathDetailContent() {
 export default function PathDetailPage() {
   return (
     <Suspense fallback={
-      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant), serif', fontSize: '20px', color: '#7a7568' }}>
-        Загрузка…
+      <div className="page-loading">
+        <div className="page-loading-spinner" />
+        <p>Загрузка…</p>
       </div>
     }>
       <PathDetailContent />
