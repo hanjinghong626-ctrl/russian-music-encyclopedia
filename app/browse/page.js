@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import './glossary.css';
+import '../glossary.css';
 
 export default function GlossaryPage() {
   const [data, setData] = useState(null);
