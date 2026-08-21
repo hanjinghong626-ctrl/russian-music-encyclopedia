@@ -5,13 +5,13 @@ import { useState, useEffect } from 'react';
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   return (
-    <nav className="site-nav">
+    <nav className={`site-nav ${scrolled ? 'scrolled' : ''}`}>
       <div className="nav-inner">
         <Link href="/" className="nav-brand">
           <span className="nav-brand-cyr">Энциклопедия</span>
