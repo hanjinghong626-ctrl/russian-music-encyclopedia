@@ -10,8 +10,8 @@ const cormorant = Cormorant_Garamond({
 })
 
 export const metadata = {
-  title: '俄罗斯音乐百科 | Энциклопедия русской музыки',
-  description: '从格林卡到肖斯塔科维奇，1665条中俄双语音乐术语百科。',
+  title: '俄罗斯音乐辞典 | Словарь русской музыки',
+  description: '从格林卡到肖斯塔科维奇，1665条中俄双语音乐术语辞典。',
 }
 
 export default function RootLayout({ children }) {
