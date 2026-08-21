@@ -21,9 +21,9 @@ export default function Hero({ stats }) {
       <div className="hero-bg" />
       <div className="hero-overlay" />
       <div className="hero-content">
-        <span className="hero-overline">Энциклопедия русской музыки</span>
-        <h1 className="hero-title">俄罗斯音乐百科</h1>
-        <p className="hero-subtitle-cyr">Русская музыкальная энциклопедия</p>
+        <span className="hero-overline">Словарь русской музыки</span>
+        <h1 className="hero-title">俄罗斯音乐辞典</h1>
+        <p className="hero-subtitle-cyr">Русский музыкальный словарь</p>
         <div className="hero-divider" />
         <p className="hero-desc">
           从格林卡到肖斯塔科维奇，横跨两个世纪的音乐传统。<br/>
