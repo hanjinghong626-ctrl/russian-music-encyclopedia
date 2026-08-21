@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 
-export default function LearningPaths({ paths, entries }) {
+export default function LearningPaths({ paths }) {
   const pathNames = Object.keys(paths);
   const sorted = pathNames
     .map(name => {
@@ -12,12 +12,12 @@ export default function LearningPaths({ paths, entries }) {
     .sort((a, b) => b.total - a.total);
 
   return (
-    <section className="ency-section" id="paths">
-      <div className="ency-container">
-        <header className="ency-header">
-          <span className="ency-eyebrow">Curriculum</span>
-          <h2 className="ency-heading">学习路径</h2>
-          <div className="ency-heading-rule" />
+    <section className="section" id="paths">
+      <div className="section-inner">
+        <header className="section-header">
+          <span className="section-eyebrow">Curriculum</span>
+          <h2 className="section-title">学习路径</h2>
+          <div className="section-rule" />
         </header>
 
         <div className="paths-list">
@@ -28,13 +28,13 @@ export default function LearningPaths({ paths, entries }) {
                 <div className="path-title">{p.name}</div>
                 <div className="path-meta">
                   入门 {p.levels.beginner?.length || 0}
-                  <span className="path-meta-dot">·</span>
+                  <span className="path-meta-dot" />
                   进阶 {p.levels.intermediate?.length || 0}
-                  <span className="path-meta-dot">·</span>
+                  <span className="path-meta-dot" />
                   高级 {p.levels.advanced?.length || 0}
                 </div>
               </div>
-              <svg className="path-arrow" width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2">
+              <svg className="path-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2">
                 <path d="M6 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </Link>
