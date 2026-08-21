@@ -1,49 +1,74 @@
 'use client';
-
 import Link from 'next/link';
 
+const romanNumerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X',
+  'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX'];
+
+// Map category Chinese names to Cyrillic transliterations (for display flavor)
+const cyrMap = {
+  '作曲家': 'Композиторы',
+  '音乐理论': 'Теория музыки',
+  '乐器': 'Инструменты',
+  '歌剧': 'Опера',
+  '芭蕾': 'Балет',
+  '体裁': 'Жанры',
+  '声乐': 'Вокал',
+  '指挥与管弦乐团': 'Дирижирование',
+  '民间音乐': 'Народная музыка',
+  '音乐教育': 'Образование',
+  '音乐学': 'Музыкознание',
+  '宗教音乐': 'Духовная музыка',
+  '浪漫曲': 'Романс',
+  '音阶调式与和声': 'Гармония',
+  '记谱法与乐理基础': 'Нотация',
+  '旋律与曲式': 'Форма',
+  '节奏与节拍': 'Ритм',
+  '音程与和弦': 'Интервалы',
+  '音乐术语': 'Термины',
+  '表演实践': 'Исполнение',
+};
+
 export default function CategoryGrid({ groups, categoryCounts }) {
+  let globalIdx = 0;
+
   return (
-    <section id="categories" className="section section--light">
-      <div className="container">
-        <div className="section-header">
-          <span className="section-eyebrow">Browse by Category</span>
-          <h2 className="section-title">按分类浏览</h2>
-          <div className="section-ornament">
-            <span /><span className="ornament-leaf">❦</span><span />
-          </div>
-        </div>
-        <div className="groups-list">
+    <section className="ency-section" id="categories">
+      <div className="ency-container">
+        <header className="ency-header">
+          <span className="ency-eyebrow">Index</span>
+          <h2 className="ency-heading">分类索引</h2>
+          <div className="ency-heading-rule" />
+        </header>
+
+        <ul className="dict-index">
           {groups.map((group, gi) => (
-            <div key={group.group} className="group-block">
-              <div className="group-header">
-                <span className="group-number">{toRoman(gi + 1)}</span>
-                <h3 className="group-name">{group.group}</h3>
-                <span className="group-count">{group.total_entries} 条</span>
+            <li key={gi} className="dict-group">
+              <div className="dict-group-label">
+                <span className="dict-group-icon">{group.icon}</span>
+                {group.group}
               </div>
-              <div className="cat-grid">
-                {group.categories.map((catName) => {
+              <ul className="dict-items">
+                {group.categories.map(catName => {
                   const count = categoryCounts[catName] || 0;
+                  const cyr = cyrMap[catName] || '';
+                  globalIdx++;
                   return (
-                    <Link key={catName} href={`/browse?category=${encodeURIComponent(catName)}`} className="cat-card">
-                      <span className="cat-card-name">{catName}</span>
-                      <span className="cat-card-count">{count}</span>
-                      <svg className="cat-card-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </Link>
+                    <li key={catName}>
+                      <Link href={`/browse?category=${encodeURIComponent(catName)}`} className="dict-item">
+                        <span className="dict-item-num">{romanNumerals[globalIdx - 1]}</span>
+                        <span className="dict-item-name">{catName}</span>
+                        {cyr && <span className="dict-item-name-cyr">{cyr}</span>}
+                        <span className="dict-dots" />
+                        <span className="dict-item-count">{count}</span>
+                      </Link>
+                    </li>
                   );
                 })}
-              </div>
-            </div>
+              </ul>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );
-}
-
-function toRoman(num) {
-  const romans = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
-  return romans[num - 1] || String(num);
 }
