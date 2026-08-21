@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import '../../home.css';
 
-export default function PathDetailPage() {
+function PathDetailContent() {
   const params = useParams();
   const pathName = decodeURIComponent(params.name);
   const [data, setData] = useState(null);
@@ -90,5 +90,17 @@ export default function PathDetailPage() {
       </main>
       <Footer />
     </>
+  );
+}
+
+export default function PathDetailPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant), serif', fontSize: '20px', color: '#7a7568' }}>
+        Загрузка…
+      </div>
+    }>
+      <PathDetailContent />
+    </Suspense>
   );
 }
