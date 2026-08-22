@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback, useRef, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import '../glossary.css';
+
+const PAGE_SIZE = 48;
 
 function BrowseContent() {
   const [data, setData] = useState(null);
@@ -12,11 +14,16 @@ function BrowseContent() {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [activeEntry, setActiveEntry] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState('card'); // 'card' | 'list' | 'table'
+  const [viewMode, setViewMode] = useState('card');
   const [qualityFilter, setQualityFilter] = useState(null);
+  const [page, setPage] = useState(1);
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const mainRef = useRef(null);
+  const detailCloseRef = useRef(null);
+  const lastTriggerRef = useRef(null);
 
-  // Read URL search params on mount
+  // Read URL params on mount
   useEffect(() => {
     const cat = searchParams.get('category');
     const q = searchParams.get('q');
@@ -24,9 +31,24 @@ function BrowseContent() {
     if (cat) setSelectedCategory(cat);
     if (q) setSearchQuery(q);
     if (view && ['card','list','table'].includes(view)) setViewMode(view);
-  }, [searchParams]); // null | 'expert' | 'full' | 'detailed' | 'brief'
-  const mainRef = useRef(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  // Sync state to URL
+  const updateUrl = useCallback((updates) => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null || value === undefined || value === '') {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
+    const qs = params.toString();
+    router.replace(qs ? `/browse?${qs}` : '/browse', { scroll: false });
+  }, [searchParams, router]);
+
+  // Load data
   useEffect(() => {
     async function loadData() {
       try {
@@ -44,7 +66,29 @@ function BrowseContent() {
     loadData();
   }, []);
 
-  // Filter entries
+  // Weighted search scoring
+  const scoreEntry = useCallback((entry, q) => {
+    if (!q) return 0;
+    const ql = q.toLowerCase();
+    const zh = (entry.zh || '').toLowerCase();
+    const ru = (entry.ru || '').toLowerCase();
+    const defZh = (entry.definition_zh || '').toLowerCase();
+    const defRu = (entry.definition_ru || '').toLowerCase();
+
+    let score = 0;
+    // Exact title match
+    if (zh === ql || ru === ql) score = Math.max(score, 100);
+    // Title starts with
+    if (zh.startsWith(ql) || ru.startsWith(ql)) score = Math.max(score, 80);
+    // Title contains
+    if (zh.includes(ql) || ru.includes(ql)) score = Math.max(score, 60);
+    // Definition contains
+    if (defZh.includes(ql)) score = Math.max(score, 10);
+    if (defRu.includes(ql)) score = Math.max(score, 10);
+    return score;
+  }, []);
+
+  // Filter + sort entries
   const filteredEntries = useMemo(() => {
     let result = entries;
     if (selectedCategory) {
@@ -55,15 +99,27 @@ function BrowseContent() {
     }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
-      result = result.filter(e =>
-        e.ru.toLowerCase().includes(q) ||
-        e.zh.toLowerCase().includes(q) ||
-        e.definition_zh.toLowerCase().includes(q) ||
-        (e.definition_ru && e.definition_ru.toLowerCase().includes(q))
-      );
+      result = result
+        .map(e => ({ entry: e, score: scoreEntry(e, q) }))
+        .filter(x => x.score > 0)
+        .sort((a, b) => b.score - a.score || a.entry.zh.localeCompare(b.entry.zh, 'zh'))
+        .map(x => x.entry);
     }
     return result;
-  }, [entries, searchQuery, selectedCategory, qualityFilter]);
+  }, [entries, searchQuery, selectedCategory, qualityFilter, scoreEntry]);
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filteredEntries.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const visibleEntries = useMemo(() => {
+    const start = (safePage - 1) * PAGE_SIZE;
+    return filteredEntries.slice(start, start + PAGE_SIZE);
+  }, [filteredEntries, safePage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, selectedCategory, qualityFilter, viewMode]);
 
   // Entry lookup map
   const getEntryById = useMemo(() => {
@@ -72,59 +128,58 @@ function BrowseContent() {
     return map;
   }, [entries]);
 
-  // Quality stats
   const qualityStats = useMemo(() => {
     const s = { expert: 0, full: 0, detailed: 0, brief: 0 };
     entries.forEach(e => { if (s[e.quality] !== undefined) s[e.quality]++; });
     return s;
   }, [entries]);
 
-  // Navigate to entry (cross-view interaction)
   const navigateToEntry = useCallback((entryId) => {
     const entry = getEntryById[entryId];
     if (!entry) return;
-    // Switch to card view for detail
-    setViewMode('card');
     setActiveEntry(entry);
-    // Scroll after state update
-    setTimeout(() => {
-      const el = document.getElementById(`entry-${entryId}`);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.classList.add('highlight-flash');
-        setTimeout(() => el.classList.remove('highlight-flash'), 2000);
-      }
-    }, 100);
   }, [getEntryById]);
 
-  const handleCrossRefClick = useCallback((entryId) => {
-    navigateToEntry(entryId);
-  }, [navigateToEntry]);
-
-  const handleEntryClick = useCallback((entry) => {
+  const handleEntryClick = useCallback((entry, triggerEl) => {
+    lastTriggerRef.current = triggerEl || null;
     setActiveEntry(entry);
   }, []);
 
   const handleCloseDetail = useCallback(() => {
     setActiveEntry(null);
+    // Restore focus
+    setTimeout(() => {
+      if (lastTriggerRef.current) {
+        lastTriggerRef.current.focus();
+      }
+    }, 50);
   }, []);
 
-  // Table row click
-  const handleTableEntryClick = useCallback((entry) => {
-    setActiveEntry(entry);
-  }, []);
+  // Escape key + body scroll lock for modal
+  useEffect(() => {
+    if (!activeEntry) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') handleCloseDetail();
+    };
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    // Focus close button
+    setTimeout(() => detailCloseRef.current?.focus(), 100);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [activeEntry, handleCloseDetail]);
 
-
-  // Group filtered entries by category for table view
   const groupedByCategory = useMemo(() => {
     const groups = {};
-    filteredEntries.forEach(e => {
+    visibleEntries.forEach(e => {
       const cat = e.category_zh;
       if (!groups[cat]) groups[cat] = [];
       groups[cat].push(e);
     });
     return groups;
-  }, [filteredEntries]);
+  }, [visibleEntries]);
 
   if (loading) {
     return (
@@ -141,15 +196,34 @@ function BrowseContent() {
   const hasRussianDef = (e) => e.definition_ru && e.definition_ru.length > 0;
   const hasCrossRefs = (e) => e.cross_refs && e.cross_refs.length > 0;
 
+  const handleSearchChange = (val) => {
+    setSearchQuery(val);
+    updateUrl({ q: val || null, page: null });
+  };
+  const handleCategoryChange = (cat) => {
+    const newCat = selectedCategory === cat ? null : cat;
+    setSelectedCategory(newCat);
+    setSelectedGroup(null);
+    updateUrl({ category: newCat, page: null });
+  };
+  const handleViewChange = (v) => {
+    setViewMode(v);
+    updateUrl({ view: v, page: null });
+  };
+  const handleQualityChange = (q) => {
+    const newQ = qualityFilter === q ? null : q;
+    setQualityFilter(newQ);
+    updateUrl({ page: null });
+  };
+
   return (
     <div className="glossary-page">
-      {/* Header */}
       <header className="glossary-header">
         <div className="header-left">
           <a href="/" className="back-link">← 返回首页</a>
           <div className="header-title">
-            <h1>俄罗斯音乐知识库</h1>
-            <p className="header-subtitle">Энциклопедия русской музыки · 百科 + 术语库</p>
+            <h1>俄罗斯音乐辞典</h1>
+            <p className="header-subtitle">Словарь русской музыки · 1665 条中俄双语术语</p>
           </div>
         </div>
         <div className="header-stats">
@@ -158,76 +232,59 @@ function BrowseContent() {
             <span className="stat-label">词条</span>
           </div>
           <div className="stat-badge">
-            <span className="stat-num">{Object.keys(categoryTree).length}</span>
+            <span className="stat-num">{stats.categories || 20}</span>
             <span className="stat-label">分类</span>
           </div>
           <div className="stat-badge">
-            <span className="stat-num">{stats.cross_references?.entries_with_refs || 0}</span>
-            <span className="stat-label">交叉引用</span>
+            <span className="stat-num">{stats.cross_references?.total_references || 0}</span>
+            <span className="stat-label">引用关系</span>
           </div>
         </div>
       </header>
 
       <div className="glossary-body">
-        {/* Left sidebar */}
         <aside className="glossary-sidebar">
-          {/* Search */}
           <div className="sidebar-search">
+            <label htmlFor="search-input" className="sr-only">搜索术语</label>
             <input
+              id="search-input"
               type="text"
               placeholder="搜索术语（中/俄）..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="search-input"
             />
             {searchQuery && (
-              <button className="search-clear" onClick={() => setSearchQuery('')}>✕</button>
+              <button className="search-clear" onClick={() => handleSearchChange('')} aria-label="清除搜索">✕</button>
             )}
           </div>
 
-          {/* Quality filter */}
           <div className="quality-filter-section">
             <h3 className="section-title">内容深度</h3>
             <div className="quality-filters">
-              <button
-                className={`qf-btn ${!qualityFilter ? 'active' : ''}`}
-                onClick={() => setQualityFilter(null)}
-              >
+              <button className={`qf-btn ${!qualityFilter ? 'active' : ''}`} onClick={() => { setQualityFilter(null); updateUrl({page:null}); }}>
                 全部 <span>{entries.length}</span>
               </button>
-              <button
-                className={`qf-btn qf-expert ${qualityFilter === 'expert' ? 'active' : ''}`}
-                onClick={() => setQualityFilter(qualityFilter === 'expert' ? null : 'expert')}
-              >
+              <button className={`qf-btn qf-expert ${qualityFilter === 'expert' ? 'active' : ''}`} onClick={() => handleQualityChange('expert')}>
                 专家级 <span>{qualityStats.expert}</span>
               </button>
-              <button
-                className={`qf-btn qf-full ${qualityFilter === 'full' ? 'active' : ''}`}
-                onClick={() => setQualityFilter(qualityFilter === 'full' ? null : 'full')}
-              >
+              <button className={`qf-btn qf-full ${qualityFilter === 'full' ? 'active' : ''}`} onClick={() => handleQualityChange('full')}>
                 完整 <span>{qualityStats.full}</span>
               </button>
-              <button
-                className={`qf-btn qf-detailed ${qualityFilter === 'detailed' ? 'active' : ''}`}
-                onClick={() => setQualityFilter(qualityFilter === 'detailed' ? null : 'detailed')}
-              >
+              <button className={`qf-btn qf-detailed ${qualityFilter === 'detailed' ? 'active' : ''}`} onClick={() => handleQualityChange('detailed')}>
                 详细 <span>{qualityStats.detailed}</span>
               </button>
-              <button
-                className={`qf-btn qf-brief ${qualityFilter === 'brief' ? 'active' : ''}`}
-                onClick={() => setQualityFilter(qualityFilter === 'brief' ? null : 'brief')}
-              >
+              <button className={`qf-btn qf-brief ${qualityFilter === 'brief' ? 'active' : ''}`} onClick={() => handleQualityChange('brief')}>
                 基础 <span>{qualityStats.brief}</span>
               </button>
             </div>
           </div>
 
-          {/* Category navigation */}
           <div className="category-section">
             <h3 className="section-title">分类导航</h3>
             <button
               className={`group-btn ${!selectedCategory ? 'active' : ''}`}
-              onClick={() => { setSelectedCategory(null); setSelectedGroup(null); }}
+              onClick={() => { setSelectedCategory(null); setSelectedGroup(null); updateUrl({category:null,page:null}); }}
             >
               全部词条
               <span className="count">{entries.length}</span>
@@ -238,8 +295,8 @@ function BrowseContent() {
                 <button
                   className={`group-header ${selectedGroup === group.group ? 'expanded' : ''}`}
                   onClick={() => setSelectedGroup(selectedGroup === group.group ? null : group.group)}
+                  aria-expanded={selectedGroup === group.group}
                 >
-                  <span className="group-icon">{group.icon}</span>
                   <span className="group-name">{group.group}</span>
                   <span className="group-count">{group.total_entries}</span>
                 </button>
@@ -251,7 +308,7 @@ function BrowseContent() {
                         <button
                           key={ci}
                           className={`category-btn ${selectedCategory === cat ? 'active' : ''}`}
-                          onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+                          onClick={() => handleCategoryChange(cat)}
                         >
                           {cat}
                           <span className="count">{treeEntry?.count || 0}</span>
@@ -263,100 +320,54 @@ function BrowseContent() {
               </div>
             ))}
           </div>
-
-          {/* Learning paths */}
-          {data?.learning_paths && (
-            <div className="learning-section">
-              <h3 className="section-title">学习路径</h3>
-              <p className="section-hint">按分类推荐由浅入深的阅读顺序</p>
-              <select
-                className="path-select"
-                onChange={(e) => {
-                  const cat = e.target.value;
-                  if (cat) setSelectedCategory(cat);
-                }}
-                defaultValue=""
-              >
-                <option value="" disabled>选择分类查看</option>
-                {Object.keys(data.learning_paths).map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </div>
-          )}
         </aside>
 
-        {/* Main content */}
         <main className="glossary-main" ref={mainRef}>
-          {/* Toolbar with view mode switch */}
           <div className="main-toolbar">
             <span className="result-count">
               {selectedCategory ? `${selectedCategory} · ` : ''}
               {filteredEntries.length} 条
               {searchQuery && ` · 搜索"${searchQuery}"`}
+              {totalPages > 1 && ` · 第 ${safePage}/${totalPages} 页`}
             </span>
             <div className="toolbar-right">
-              {/* View mode tabs */}
-              <div className="view-tabs">
-                <button
+              <div className="view-tabs" role="tablist" aria-label="视图切换">
+                <button role="tab" aria-selected={viewMode==='card'}
                   className={`view-tab ${viewMode === 'card' ? 'active' : ''}`}
-                  onClick={() => setViewMode('card')}
-                  title="百科视图：卡片展示完整释义"
-                >
+                  onClick={() => handleViewChange('card')} title="百科视图">
                   📖 百科
                 </button>
-                <button
+                <button role="tab" aria-selected={viewMode==='table'}
                   className={`view-tab ${viewMode === 'table' ? 'active' : ''}`}
-                  onClick={() => setViewMode('table')}
-                  title="术语表视图：紧凑表格快速查阅"
-                >
+                  onClick={() => handleViewChange('table')} title="术语表视图">
                   📋 术语表
                 </button>
-                <button
+                <button role="tab" aria-selected={viewMode==='list'}
                   className={`view-tab ${viewMode === 'list' ? 'active' : ''}`}
-                  onClick={() => setViewMode('list')}
-                  title="列表视图：简洁列表"
-                >
+                  onClick={() => handleViewChange('list')} title="列表视图">
                   📝 列表
                 </button>
               </div>
             </div>
           </div>
 
-          {/* View mode descriptions */}
-          {viewMode === 'card' && (
-            <div className="view-hint">
-              💡 百科视图 — 点击词条查看完整释义，通过<span className="hint-link">相关术语</span>标签跳转关联知识
-            </div>
-          )}
-          {viewMode === 'table' && (
-            <div className="view-hint">
-              💡 术语表视图 — 紧凑表格快速查阅，点击任意行打开详情，点击分类标签可筛选
-            </div>
-          )}
-          {viewMode === 'list' && (
-            <div className="view-hint">
-              💡 列表视图 — 简洁展示所有词条，适合快速浏览
-            </div>
-          )}
-
-          {/* ===== CARD VIEW (百科) ===== */}
+          {/* CARD VIEW */}
           {viewMode === 'card' && (
             <div className="entries-container card">
-              {filteredEntries.length === 0 ? (
+              {visibleEntries.length === 0 ? (
                 <div className="no-results">
                   <p>未找到匹配的词条</p>
-                  <button onClick={() => { setSearchQuery(''); setSelectedCategory(null); setQualityFilter(null); }}>
+                  <button onClick={() => { handleSearchChange(''); setSelectedCategory(null); setQualityFilter(null); updateUrl({q:null,category:null,page:null}); }}>
                     清除筛选
                   </button>
                 </div>
               ) : (
-                filteredEntries.map(entry => (
-                  <div
+                visibleEntries.map(entry => (
+                  <button
                     key={entry.id}
                     id={`entry-${entry.id}`}
                     className={`entry-card quality-${entry.quality} ${activeEntry?.id === entry.id ? 'active' : ''}`}
-                    onClick={() => handleEntryClick(entry)}
+                    onClick={(e) => handleEntryClick(entry, e.currentTarget)}
                   >
                     <div className="entry-header">
                       <span className="entry-ru">{entry.ru}</span>
@@ -372,27 +383,17 @@ function BrowseContent() {
                       {entry.definition_zh.length > 200
                         ? entry.definition_zh.slice(0, 200) + '...'
                         : entry.definition_zh}
-                      {entry.definition_zh.length > 200 && (
-                        <button className="read-more" onClick={(e) => { e.stopPropagation(); handleEntryClick(entry); }}>
-                          展开全文
-                        </button>
-                      )}
                     </div>
-
-                    {/* Cross references */}
                     {hasCrossRefs(entry) && (
                       <div className="cross-refs">
-                        <span className="refs-label">🔗 相关术语：</span>
+                        <span className="refs-label">相关术语：</span>
                         <div className="refs-tags">
                           {entry.cross_refs.slice(0, 6).map(refId => {
                             const refEntry = getEntryById[refId];
                             if (!refEntry) return null;
                             return (
-                              <button
-                                key={refId}
-                                className="ref-tag"
-                                onClick={(e) => { e.stopPropagation(); handleCrossRefClick(refId); }}
-                              >
+                              <button key={refId} className="ref-tag"
+                                onClick={(e) => { e.stopPropagation(); navigateToEntry(refId); }}>
                                 {refEntry.zh}
                               </button>
                             );
@@ -403,7 +404,6 @@ function BrowseContent() {
                         </div>
                       </div>
                     )}
-
                     {hasRussianDef(entry) && (
                       <div className="entry-ru-def">
                         <span className="ru-label">RU:</span>
@@ -414,22 +414,17 @@ function BrowseContent() {
                         </span>
                       </div>
                     )}
-                  </div>
+                  </button>
                 ))
               )}
             </div>
           )}
 
-          {/* ===== TABLE VIEW (术语表) ===== */}
+          {/* TABLE VIEW */}
           {viewMode === 'table' && (
             <div className="table-view">
               {Object.keys(groupedByCategory).length === 0 ? (
-                <div className="no-results">
-                  <p>未找到匹配的词条</p>
-                  <button onClick={() => { setSearchQuery(''); setSelectedCategory(null); setQualityFilter(null); }}>
-                    清除筛选
-                  </button>
-                </div>
+                <div className="no-results"><p>未找到匹配的词条</p></div>
               ) : (
                 Object.entries(groupedByCategory).map(([cat, catEntries]) => (
                   <div key={cat} className="table-group">
@@ -437,116 +432,143 @@ function BrowseContent() {
                       <h3>{cat}</h3>
                       <span className="table-group-count">{catEntries.length} 条</span>
                     </div>
-                    <table className="glossary-table">
-                      <thead>
-                        <tr>
-                          <th className="col-ru">РУССКИЙ</th>
-                          <th className="col-zh">中文</th>
-                          <th className="col-quality">深度</th>
-                          <th className="col-refs">关联</th>
-                          <th className="col-ru-def">俄语释义</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {catEntries.map(entry => (
-                          <tr
-                            key={entry.id}
-                            id={`table-entry-${entry.id}`}
-                            className={`table-row quality-${entry.quality} ${activeEntry?.id === entry.id ? 'active' : ''}`}
-                            onClick={() => handleTableEntryClick(entry)}
-                          >
-                            <td className="col-ru">{entry.ru}</td>
-                            <td className="col-zh">{entry.zh}</td>
-                            <td className="col-quality">
-                              <span className={`quality-dot quality-${entry.quality}`}></span>
-                            </td>
-                            <td className="col-refs">
-                              {hasCrossRefs(entry) && (
-                                <div className="table-refs">
-                                  {entry.cross_refs.slice(0, 3).map(refId => {
-                                    const refEntry = getEntryById[refId];
-                                    if (!refEntry) return null;
-                                    return (
-                                      <button
-                                        key={refId}
-                                        className="table-ref-tag"
-                                        onClick={(e) => { e.stopPropagation(); handleCrossRefClick(refId); }}
-                                        title={refEntry.ru}
-                                      >
-                                        {refEntry.zh}
-                                      </button>
-                                    );
-                                  })}
-                                  {entry.cross_refs.length > 3 && (
-                                    <span className="table-ref-more">+{entry.cross_refs.length - 3}</span>
-                                  )}
-                                </div>
-                              )}
-                            </td>
-                            <td className="col-ru-def">
-                              {hasRussianDef(entry) ? (
-                                <span className="ru-preview">
-                                  {entry.definition_ru.length > 60
-                                    ? entry.definition_ru.slice(0, 60) + '…'
-                                    : entry.definition_ru}
-                                </span>
-                              ) : (
-                                <span className="no-data">—</span>
-                              )}
-                            </td>
+                    <div className="table-scroll-wrap">
+                      <table className="glossary-table">
+                        <thead>
+                          <tr>
+                            <th className="col-ru">РУССКИЙ</th>
+                            <th className="col-zh">中文</th>
+                            <th className="col-quality">深度</th>
+                            <th className="col-refs">关联</th>
+                            <th className="col-ru-def">俄语释义</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {catEntries.map(entry => (
+                            <tr key={entry.id}
+                              className={`table-row quality-${entry.quality}`}
+                              onClick={(e) => handleEntryClick(entry, e.currentTarget)}
+                              tabIndex={0}
+                              onKeyDown={(e) => { if (e.key === 'Enter') handleEntryClick(entry, e.currentTarget); }}
+                            >
+                              <td className="col-ru">{entry.ru}</td>
+                              <td className="col-zh">{entry.zh}</td>
+                              <td className="col-quality">
+                                <span className={`quality-dot quality-${entry.quality}`}></span>
+                              </td>
+                              <td className="col-refs">
+                                {hasCrossRefs(entry) && (
+                                  <div className="table-refs">
+                                    {entry.cross_refs.slice(0, 3).map(refId => {
+                                      const refEntry = getEntryById[refId];
+                                      if (!refEntry) return null;
+                                      return (
+                                        <button key={refId} className="table-ref-tag"
+                                          onClick={(e) => { e.stopPropagation(); navigateToEntry(refId); }}
+                                          title={refEntry.ru}>
+                                          {refEntry.zh}
+                                        </button>
+                                      );
+                                    })}
+                                    {entry.cross_refs.length > 3 && (
+                                      <span className="table-ref-more">+{entry.cross_refs.length - 3}</span>
+                                    )}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="col-ru-def">
+                                {hasRussianDef(entry) ? (
+                                  <span className="ru-preview">
+                                    {entry.definition_ru.length > 60 ? entry.definition_ru.slice(0, 60) + '…' : entry.definition_ru}
+                                  </span>
+                                ) : <span className="no-data">—</span>}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 ))
               )}
             </div>
           )}
 
-          {/* ===== LIST VIEW ===== */}
+          {/* LIST VIEW */}
           {viewMode === 'list' && (
             <div className="entries-container list">
-              {filteredEntries.length === 0 ? (
-                <div className="no-results">
-                  <p>未找到匹配的词条</p>
-                  <button onClick={() => { setSearchQuery(''); setSelectedCategory(null); setQualityFilter(null); }}>
-                    清除筛选
-                  </button>
-                </div>
+              {visibleEntries.length === 0 ? (
+                <div className="no-results"><p>未找到匹配的词条</p></div>
               ) : (
-                filteredEntries.map(entry => (
-                  <div
-                    key={entry.id}
-                    id={`entry-${entry.id}`}
-                    className={`list-item quality-${entry.quality} ${activeEntry?.id === entry.id ? 'active' : ''}`}
-                    onClick={() => handleEntryClick(entry)}
+                visibleEntries.map(entry => (
+                  <button key={entry.id}
+                    className={`list-item quality-${entry.quality}`}
+                    onClick={(e) => handleEntryClick(entry, e.currentTarget)}
                   >
                     <span className="list-ru">{entry.ru}</span>
                     <span className="list-zh">{entry.zh}</span>
                     <span className="list-cat">{entry.category_zh}</span>
                     <span className={`quality-dot quality-${entry.quality}`}></span>
-                  </div>
+                  </button>
                 ))
               )}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="pagination" role="navigation" aria-label="分页导航">
+              <button
+                className="page-btn"
+                disabled={safePage <= 1}
+                onClick={() => { setPage(p => Math.max(1, p - 1)); mainRef.current?.scrollIntoView({behavior:'smooth'}); }}
+                aria-label="上一页"
+              >
+                ← 上一页
+              </button>
+              <span className="page-info">
+                {safePage} / {totalPages}
+              </span>
+              <button
+                className="page-btn"
+                disabled={safePage >= totalPages}
+                onClick={() => { setPage(p => Math.min(totalPages, p + 1)); mainRef.current?.scrollIntoView({behavior:'smooth'}); }}
+                aria-label="下一页"
+              >
+                下一页 →
+              </button>
             </div>
           )}
         </main>
       </div>
 
-      {/* Detail panel */}
+      {/* Detail Modal — accessible */}
       {activeEntry && (
-        <div className="detail-overlay" onClick={handleCloseDetail}>
-          <div className="detail-panel" onClick={(e) => e.stopPropagation()}>
-            <button className="detail-close" onClick={handleCloseDetail}>✕</button>
+        <div className="detail-overlay" role="presentation" onClick={handleCloseDetail}>
+          <section
+            className="detail-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`entry-title-${activeEntry.id}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              ref={detailCloseRef}
+              type="button"
+              className="detail-close"
+              onClick={handleCloseDetail}
+              aria-label="关闭词条详情"
+            >
+              ✕
+            </button>
 
             <div className="detail-header">
-              <h2 className="detail-ru">{activeEntry.ru}</h2>
+              <h2 className="detail-ru" id={`entry-title-${activeEntry.id}`}>{activeEntry.ru}</h2>
               <h3 className="detail-zh">{activeEntry.zh}</h3>
               <div className="detail-meta">
                 <button
                   className="detail-category-btn"
-                  onClick={() => { setSelectedCategory(activeEntry.category_zh); handleCloseDetail(); }}
+                  onClick={() => { handleCategoryChange(activeEntry.category_zh); handleCloseDetail(); }}
                 >
                   {activeEntry.category_zh}
                 </button>
@@ -563,14 +585,12 @@ function BrowseContent() {
                 <h4>中文释义</h4>
                 <p className="detail-definition">{activeEntry.definition_zh}</p>
               </div>
-
               {hasRussianDef(activeEntry) && (
                 <div className="detail-section">
                   <h4>俄语原文</h4>
                   <p className="detail-ru-text">{activeEntry.definition_ru}</p>
                 </div>
               )}
-
               {hasCrossRefs(activeEntry) && (
                 <div className="detail-section">
                   <h4>相关术语 ({activeEntry.cross_refs.length})</h4>
@@ -579,11 +599,8 @@ function BrowseContent() {
                       const refEntry = getEntryById[refId];
                       if (!refEntry) return null;
                       return (
-                        <button
-                          key={refId}
-                          className="detail-ref-btn"
-                          onClick={() => navigateToEntry(refId)}
-                        >
+                        <button key={refId} className="detail-ref-btn"
+                          onClick={() => navigateToEntry(refId)}>
                           <span className="ref-ru">{refEntry.ru}</span>
                           <span className="ref-zh">{refEntry.zh}</span>
                           <span className="ref-cat">{refEntry.category_zh}</span>
@@ -593,7 +610,6 @@ function BrowseContent() {
                   </div>
                 </div>
               )}
-
               {activeEntry.back_refs && activeEntry.back_refs.length > 0 && (
                 <div className="detail-section">
                   <h4>被以下术语引用 ({activeEntry.back_refs.length})</h4>
@@ -602,11 +618,8 @@ function BrowseContent() {
                       const refEntry = getEntryById[refId];
                       if (!refEntry) return null;
                       return (
-                        <button
-                          key={refId}
-                          className="detail-ref-btn back-ref"
-                          onClick={() => navigateToEntry(refId)}
-                        >
+                        <button key={refId} className="detail-ref-btn back-ref"
+                          onClick={() => navigateToEntry(refId)}>
                           <span className="ref-ru">{refEntry.ru}</span>
                           <span className="ref-zh">{refEntry.zh}</span>
                         </button>
@@ -616,7 +629,7 @@ function BrowseContent() {
                 </div>
               )}
             </div>
-          </div>
+          </section>
         </div>
       )}
     </div>
