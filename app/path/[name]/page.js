@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '../../components/Navbar';
@@ -25,7 +25,15 @@ function PathDetailContent() {
       .catch(console.error);
   }, []);
 
-  if (!data) {
+  // Build id -> entry Map once data loads (O(n) instead of O(n*m) with .find())
+  const entryMap = useMemo(() => {
+    if (!data?.entries) return null;
+    const m = new Map();
+    for (const e of data.entries) m.set(e.id, e);
+    return m;
+  }, [data]);
+
+  if (!data || !entryMap) {
     return (
       <div className="page-loading">
         <div className="page-loading-spinner" />
@@ -53,7 +61,7 @@ function PathDetailContent() {
 
   const entryIds = pathData[activeLevel] || [];
   const currentEntries = entryIds
-    .map(id => data.entries.find(e => e.id === id))
+    .map(id => entryMap.get(id))
     .filter(Boolean);
 
   return (
@@ -61,16 +69,18 @@ function PathDetailContent() {
       <Navbar />
       <main className="pd-page">
         <div className="pd-header">
-          <Link href="/" className="pd-breadcrumb">← Энциклопедия</Link>
+          <Link href="/" className="pd-breadcrumb">← Словарь</Link>
           <h1 className="pd-title">{pathName}</h1>
           <p className="pd-cyr">Учебный путь</p>
         </div>
 
         <div className="pd-body">
-          <div className="pd-tabs">
+          <div className="pd-tabs" role="tablist" aria-label="难度等级">
             {Object.entries(levelLabels).map(([key, { label, cyr }]) => (
               <button
                 key={key}
+                role="tab"
+                aria-selected={activeLevel === key}
                 className={`pd-tab${activeLevel === key ? ' active' : ''}`}
                 onClick={() => setActiveLevel(key)}
               >
@@ -82,7 +92,7 @@ function PathDetailContent() {
             ))}
           </div>
 
-          <div className="pd-entries">
+          <div className="pd-entries" role="tabpanel">
             {currentEntries.length === 0 ? (
               <p className="pd-empty">本阶段暂无词条</p>
             ) : (
