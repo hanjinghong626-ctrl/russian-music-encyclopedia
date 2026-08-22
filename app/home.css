@@ -333,3 +333,43 @@
   .hero-stats { flex-wrap: wrap; gap: 16px; }
   .hero-stats-sep { display: none; }
 }
+
+
+/* ============================================
+   v3.1 Mobile Nav Fixes
+   ============================================ */
+.nav-inner {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+.nav-brand {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nav-links {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nav-link {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .nav-inner {
+    padding: 0 14px;
+    height: 56px;
+  }
+  .nav-links {
+    gap: 14px;
+  }
+  .nav-link {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+  .nav-brand {
+    font-size: 13px;
+  }
+  .nav-brand-cyr {
+    font-size: 14px;
+  }
+}
