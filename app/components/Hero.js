@@ -5,9 +5,10 @@ const popularTags = ['歌剧', '芭蕾', '钢琴', '肖斯塔科维奇', '旋律
 
 export default function Hero({ stats }) {
   const [query, setQuery] = useState('');
-  const totalEntries = stats?.total_entries || 1665;
-  const totalRefs = stats?.cross_references?.total_references || 4333;
-  const categories = stats?.categories || 14;
+  const totalEntries = stats?.total_entries ?? 1665;
+  const totalRefs = stats?.cross_references?.total_references ?? 4333;
+  const entriesWithRefs = stats?.cross_references?.entries_with_refs ?? 1355;
+  const categories = stats?.categories ?? 20;
 
   function handleSearch(e) {
     e.preventDefault();
@@ -27,7 +28,7 @@ export default function Hero({ stats }) {
         <div className="hero-divider" />
         <p className="hero-desc">
           从格林卡到肖斯塔科维奇，横跨两个世纪的音乐传统。<br/>
-          <b>{totalEntries}</b> 条中俄双语术语 · <b>{totalRefs}</b> 条交叉引用 · <b>{categories}</b> 个分类
+          <b>{totalEntries}</b> 条中俄双语术语 · <b>{totalRefs}</b> 条引用关系 · <b>{categories}</b> 个分类
         </p>
 
         <form className="hero-search" onSubmit={handleSearch}>
@@ -36,6 +37,7 @@ export default function Hero({ stats }) {
             placeholder="搜索术语、作曲家、作品……"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            aria-label="搜索术语"
           />
           <button type="submit" aria-label="搜索">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -63,7 +65,7 @@ export default function Hero({ stats }) {
           </div>
           <div className="hero-stats-sep" />
           <div className="hero-stats-item">
-            <strong>{totalRefs}</strong>交叉引用
+            <strong>{entriesWithRefs}</strong>含关联词条
           </div>
         </div>
       </div>
