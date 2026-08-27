@@ -19,7 +19,7 @@ export default function PathIndexPage() {
       .then(function(json) {
         if (!cancelled) setData(json);
       })
-      .catch(function() {
+      .catch(function(err) {
         if (!cancelled) setLoadError(true);
       });
     return function() { cancelled = true; };
