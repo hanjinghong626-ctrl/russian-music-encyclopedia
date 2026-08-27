@@ -373,3 +373,423 @@
     font-size: 14px;
   }
 }
+
+
+/* ============================================================
+   Learning Path Detail Page (/path/[name])
+   Editorial minimal — matches glossary aesthetic
+   ============================================================ */
+
+.lp-page {
+  min-height: 100vh;
+  background: var(--bg, #faf8f5);
+  padding: 0 24px 80px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Header */
+.lp-header {
+  padding: 40px 0 24px;
+  border-bottom: 1px solid var(--rule, #e8e3d9);
+  margin-bottom: 0;
+}
+
+.lp-breadcrumb {
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--muted, #9a9488);
+  text-decoration: none;
+  margin-bottom: 20px;
+  transition: color 0.2s;
+}
+.lp-breadcrumb:hover { color: var(--gold, #a68848); }
+
+.lp-header-content { margin-bottom: 16px; }
+
+.lp-title {
+  font-family: var(--serif, 'Noto Serif SC', 'Source Han Serif SC', serif);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--ink, #1a1a1a);
+  margin: 0 0 8px;
+  line-height: 1.3;
+}
+
+.lp-subtitle {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--muted, #9a9488);
+  margin: 0;
+}
+
+/* Progress bar */
+.lp-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.lp-progress-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--rule, #e8e3d9);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.lp-progress-fill {
+  height: 100%;
+  background: var(--gold, #a68848);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.lp-progress-text {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--muted, #9a9488);
+  white-space: nowrap;
+}
+
+/* Level tabs */
+.lp-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--rule, #e8e3d9);
+  margin: 0;
+  position: sticky;
+  top: 0;
+  background: var(--bg, #faf8f5);
+  z-index: 10;
+}
+
+.lp-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 8px 12px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: all 0.25s;
+  border-bottom: 2px solid transparent;
+  position: relative;
+}
+
+.lp-tab:hover { background: rgba(166, 136, 72, 0.04); }
+
+.lp-tab.active {
+  border-bottom-color: var(--tab-color, var(--gold, #a68848));
+}
+
+.lp-tab-label {
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--ink, #1a1a1a);
+}
+
+.lp-tab.active .lp-tab-label {
+  color: var(--tab-color, var(--gold, #a68848));
+  font-weight: 500;
+}
+
+.lp-tab-cyr {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--faint, #c4bdb0);
+}
+
+.lp-tab-count {
+  font-size: 11px;
+  color: var(--muted, #9a9488);
+  margin-top: 2px;
+}
+
+.lp-tab-progress {
+  font-size: 10px;
+  color: var(--faint, #c4bdb0);
+}
+
+/* Search */
+.lp-search {
+  padding: 16px 0 8px;
+}
+
+.lp-search-input {
+  width: 100%;
+  padding: 10px 16px;
+  background: #fff;
+  border: 1px solid var(--rule, #e8e3d9);
+  border-radius: 3px;
+  font-size: 13px;
+  color: var(--ink, #1a1a1a);
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.lp-search-input:focus {
+  border-color: var(--gold, #a68848);
+}
+
+.lp-search-input::placeholder {
+  color: var(--faint, #c4bdb0);
+}
+
+/* Entries container */
+.lp-entries {
+  padding: 8px 0 32px;
+}
+
+.lp-empty {
+  text-align: center;
+  padding: 48px 0;
+  font-size: 14px;
+  color: var(--muted, #9a9488);
+  letter-spacing: 0.04em;
+}
+
+/* Entry card */
+.lp-card {
+  border-bottom: 1px solid var(--rule, #e8e3d9);
+  transition: background 0.2s;
+}
+
+.lp-card:first-child {
+  border-top: 1px solid var(--rule, #e8e3d9);
+}
+
+.lp-card:hover {
+  background: rgba(166, 136, 72, 0.02);
+}
+
+.lp-card.lp-read {
+  opacity: 0.65;
+}
+
+.lp-card.lp-read .lp-card-zh {
+  text-decoration: line-through;
+  text-decoration-color: var(--faint, #c4bdb0);
+  text-decoration-thickness: 1px;
+}
+
+.lp-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.lp-card-num {
+  font-family: var(--serif, 'Noto Serif SC', 'Source Han Serif SC', serif);
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--faint, #c4bdb0);
+  min-width: 28px;
+  text-align: right;
+}
+
+.lp-read .lp-card-num {
+  color: var(--gold, #a68848);
+}
+
+.lp-card-titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.lp-card-zh {
+  display: block;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ink, #1a1a1a);
+  letter-spacing: 0.03em;
+  line-height: 1.4;
+}
+
+.lp-card-ru {
+  display: block;
+  font-size: 12px;
+  color: var(--muted, #9a9488);
+  letter-spacing: 0.02em;
+  margin-top: 2px;
+}
+
+.lp-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.lp-check-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--faint, #c4bdb0);
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.lp-check-btn:hover {
+  color: var(--gold, #a68848);
+  background: rgba(166, 136, 72, 0.08);
+}
+
+.lp-check-btn.checked {
+  color: var(--gold, #a68848);
+}
+
+.lp-expand-arrow {
+  color: var(--faint, #c4bdb0);
+  transition: transform 0.25s ease, color 0.2s;
+}
+
+.lp-expand-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.lp-card-header:hover .lp-expand-arrow {
+  color: var(--gold, #a68848);
+}
+
+/* Card body (expanded) */
+.lp-card-body {
+  padding: 0 0 16px 42px;
+  animation: lpFadeIn 0.2s ease;
+}
+
+@keyframes lpFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.lp-card-def {
+  font-size: 14px;
+  line-height: 1.75;
+  color: #4a4540;
+  margin: 0 0 8px;
+  letter-spacing: 0.01em;
+}
+
+.lp-card-cat {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--muted, #9a9488);
+  background: rgba(154, 148, 136, 0.08);
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+
+/* Card preview (collapsed, for short definitions) */
+.lp-card-preview {
+  padding: 0 0 12px 42px;
+}
+
+.lp-card-def-short {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted, #9a9488);
+  margin: 0;
+}
+
+/* Navigation footer */
+.lp-nav-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 0;
+  border-top: 1px solid var(--rule, #e8e3d9);
+  margin-top: 16px;
+}
+
+.lp-nav-link {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-decoration: none;
+  padding: 12px 16px;
+  border: 1px solid var(--rule, #e8e3d9);
+  border-radius: 3px;
+  transition: all 0.2s;
+  max-width: 48%;
+}
+
+.lp-nav-link:hover {
+  border-color: var(--gold, #a68848);
+  background: rgba(166, 136, 72, 0.03);
+}
+
+.lp-nav-next { margin-left: auto; text-align: right; }
+
+.lp-nav-dir {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--muted, #9a9488);
+}
+
+.lp-nav-name {
+  font-size: 14px;
+  color: var(--ink, #1a1a1a);
+  letter-spacing: 0.03em;
+}
+
+.lp-nav-link:hover .lp-nav-name {
+  color: var(--gold, #a68848);
+}
+
+/* iPad responsive */
+@media (max-width: 768px) {
+  .lp-page {
+    padding: 0 16px 60px;
+  }
+
+  .lp-title {
+    font-size: 22px;
+  }
+
+  .lp-tab {
+    padding: 10px 6px 8px;
+  }
+
+  .lp-tab-label {
+    font-size: 13px;
+  }
+
+  .lp-tab-cyr {
+    display: none;
+  }
+
+  .lp-card-header {
+    gap: 10px;
+    padding: 12px 0;
+  }
+
+  .lp-card-body,
+  .lp-card-preview {
+    padding-left: 38px;
+  }
+
+  .lp-nav-footer {
+    flex-direction: column;
+  }
+
+  .lp-nav-link {
+    max-width: 100%;
+  }
+}
