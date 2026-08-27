@@ -19,7 +19,7 @@ export default function Navbar() {
         </Link>
         <div className="nav-links">
           <Link href="/browse" className="nav-link">辞典浏览</Link>
-          <Link href="/#paths" className="nav-link">学习路径</Link>
+          <Link href="/path" className="nav-link">学习路径</Link>
           <Link href="/browse?view=table" className="nav-link">术语表</Link>
         </div>
       </div>
