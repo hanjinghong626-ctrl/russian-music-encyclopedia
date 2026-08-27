@@ -793,3 +793,250 @@
     max-width: 100%;
   }
 }
+
+
+/* ============================================================
+   Learning Path Index Page (/path)
+   ============================================================ */
+
+.pi-page {
+  min-height: 100vh;
+  background: var(--bg, #faf8f5);
+  padding: 0 24px 80px;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.pi-header {
+  padding: 48px 0 32px;
+  text-align: center;
+}
+
+.pi-eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold, #a68848);
+  margin-bottom: 12px;
+}
+
+.pi-title {
+  font-family: var(--serif, 'Noto Serif SC', 'Source Han Serif SC', serif);
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--ink, #1a1a1a);
+  margin: 0 0 6px;
+}
+
+.pi-cyr {
+  font-size: 14px;
+  color: var(--faint, #c4bdb0);
+  letter-spacing: 0.04em;
+  margin: 0 0 16px;
+}
+
+.pi-rule {
+  width: 48px;
+  height: 1px;
+  background: var(--gold, #a68848);
+  margin: 0 auto 20px;
+}
+
+.pi-desc {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--muted, #9a9488);
+  max-width: 520px;
+  margin: 0 auto 24px;
+  letter-spacing: 0.02em;
+}
+
+.pi-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+}
+
+.pi-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.pi-stat-num {
+  font-family: var(--serif, 'Noto Serif SC', 'Source Han Serif SC', serif);
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--ink, #1a1a1a);
+}
+
+.pi-stat-label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--muted, #9a9488);
+}
+
+/* Groups */
+.pi-group {
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid var(--rule, #e8e3d9);
+}
+
+.pi-group-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.pi-group-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.pi-group-title {
+  font-family: var(--serif, 'Noto Serif SC', 'Source Han Serif SC', serif);
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--ink, #1a1a1a);
+  margin: 0;
+}
+
+.pi-group-meta {
+  font-size: 12px;
+  color: var(--muted, #9a9488);
+  margin: 2px 0 0;
+  letter-spacing: 0.04em;
+}
+
+/* Path cards */
+.pi-group-paths {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.pi-path-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--rule, #e8e3d9);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.pi-path-card:first-child {
+  border-top: 1px solid var(--rule, #e8e3d9);
+}
+
+.pi-path-card:hover {
+  padding-left: 12px;
+  background: rgba(166, 136, 72, 0.02);
+}
+
+.pi-path-card:hover .pi-path-name {
+  color: var(--gold, #a68848);
+}
+
+.pi-path-num {
+  font-family: var(--serif, 'Noto Serif SC', 'Source Han Serif SC', serif);
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--faint, #c4bdb0);
+  min-width: 28px;
+}
+
+.pi-path-name {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ink, #1a1a1a);
+  letter-spacing: 0.04em;
+  min-width: 140px;
+  transition: color 0.2s;
+}
+
+.pi-path-bars {
+  flex: 1;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.pi-path-bar-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.pi-path-bar {
+  flex: 1;
+  height: 4px;
+  background: rgba(0,0,0,0.04);
+  border-radius: 2px;
+  overflow: hidden;
+  min-width: 20px;
+}
+
+.pi-path-bar-fill {
+  height: 100%;
+  width: var(--bar-pct, 0%);
+  background: var(--bar-color, #a68848);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.pi-path-bar-label {
+  font-size: 10px;
+  color: var(--faint, #c4bdb0);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.pi-path-total {
+  font-size: 12px;
+  color: var(--muted, #9a9488);
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+/* iPad responsive */
+@media (max-width: 768px) {
+  .pi-page {
+    padding: 0 16px 60px;
+  }
+
+  .pi-title {
+    font-size: 26px;
+  }
+
+  .pi-stats {
+    gap: 24px;
+  }
+
+  .pi-stat-num {
+    font-size: 20px;
+  }
+
+  .pi-path-card {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px 0;
+  }
+
+  .pi-path-bars {
+    width: 100%;
+    order: 3;
+    padding-left: 44px;
+  }
+
+  .pi-path-bar-label {
+    font-size: 9px;
+  }
+}
