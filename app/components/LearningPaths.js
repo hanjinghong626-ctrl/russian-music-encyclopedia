@@ -41,8 +41,19 @@ export default function LearningPaths({ paths }) {
           ))}
         </div>
 
-        <div style="text-align:center;margin-top:32px;">
-          <Link href="/path" style="font-size:13px;letter-spacing:0.08em;color:var(--gold,#a68848);text-decoration:none;border-bottom:1px solid var(--gold,#a68848);padding-bottom:2px;transition:opacity 0.2s;">
+        <div style={{ textAlign: 'center', marginTop: 32 }}>
+          <Link
+            href="/path"
+            style={{
+              fontSize: 13,
+              letterSpacing: '0.08em',
+              color: 'var(--gold, #a68848)',
+              textDecoration: 'none',
+              borderBottom: '1px solid var(--gold, #a68848)',
+              paddingBottom: 2,
+              transition: 'opacity 0.2s',
+            }}
+          >
             查看全部路径 →
           </Link>
         </div>
