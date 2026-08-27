@@ -7,26 +7,23 @@ import '../home.css';
 
 export default function PathIndexPage() {
   const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     fetch('/data/encyclopedia_unified.json')
-      .then(r => {
-        if (!r.ok) throw new Error('Failed to fetch');
-        return r.json();
-      })
-      .then(d => setData(d))
-      .catch(err => setError(err.message));
+      .then(res => res.json())
+      .then(json => { if (!cancelled) setData(json); })
+      .catch(() => { if (!cancelled) setLoadError(true); });
+    return () => { cancelled = true; };
   }, []);
 
-  if (error) {
+  if (loadError) {
     return (
       <>
         <Navbar />
-        <main style={{ maxWidth: 720, margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-          <p style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: 20, color: '#9a9488' }}>
-            数据加载失败，请刷新重试。
-          </p>
+        <main style={{ padding: '120px 24px', textAlign: 'center' }}>
+          <p style={{ color: '#9a9488', fontSize: 18 }}>数据加载失败，请刷新重试。</p>
         </main>
         <Footer />
       </>
@@ -37,49 +34,39 @@ export default function PathIndexPage() {
     return (
       <>
         <Navbar />
-        <main style={{ maxWidth: 720, margin: '0 auto', padding: '120px 24px', textAlign: 'center' }}>
-          <div style={{
-            width: 32, height: 32, border: '2px solid #e0dbd3',
-            borderTopColor: '#a68848', borderRadius: '50%',
-            animation: 'spin 0.8s linear infinite', margin: '0 auto 16px'
-          }} />
-          <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-          <p style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: 16, color: '#9a9488' }}>
-            Загрузка…
-          </p>
+        <main style={{ padding: '120px 24px', textAlign: 'center' }}>
+          <p style={{ color: '#9a9488', fontSize: 16, fontFamily: 'var(--font-cormorant), serif' }}>Загрузка…</p>
         </main>
         <Footer />
       </>
     );
   }
 
-  const learningPaths = data.learning_paths || {};
-  const categoryGroups = data.category_groups || [];
-  const allPathNames = Object.keys(learningPaths);
+  const paths = data.learning_paths || {};
+  const groups = data.category_groups || [];
+  const pathNames = Object.keys(paths);
 
-  const groups = categoryGroups.map(g => {
+  let totalEntries = 0;
+  pathNames.forEach(name => {
+    const p = paths[name] || {};
+    totalEntries += ((p.beginner || []).length + (p.intermediate || []).length + (p.advanced || []).length);
+  });
+
+  const renderedGroups = groups.map(g => {
     const cats = g.categories || [];
-    const paths = cats
-      .filter(catName => learningPaths[catName])
-      .map(catName => {
-        const lp = learningPaths[catName] || {};
-        const bCount = (lp.beginner || []).length;
-        const iCount = (lp.intermediate || []).length;
-        const aCount = (lp.advanced || []).length;
-        const total = bCount + iCount + aCount;
-        return { name: catName, total, beginner: bCount, intermediate: iCount, advanced: aCount };
+    const groupPaths = cats
+      .filter(c => paths[c])
+      .map((catName, idx) => {
+        const lp = paths[catName] || {};
+        const b = (lp.beginner || []).length;
+        const i = (lp.intermediate || []).length;
+        const a = (lp.advanced || []).length;
+        const t = b + i + a;
+        return { name: catName, b, i, a, t, idx };
       });
-    return {
-      group: g.group || '',
-      icon: g.icon || '',
-      paths,
-    };
-  }).filter(g => g.paths.length > 0);
-
-  const totalPathEntries = allPathNames.reduce((sum, name) => {
-    const lp = learningPaths[name] || {};
-    return sum + (lp.beginner || []).length + (lp.intermediate || []).length + (lp.advanced || []).length;
-  }, 0);
+    if (groupPaths.length === 0) return null;
+    return { group: g.group, icon: g.icon, paths: groupPaths };
+  }).filter(Boolean);
 
   return (
     <>
@@ -91,69 +78,59 @@ export default function PathIndexPage() {
           <p className="pi-cyr">Учебные пути</p>
           <div className="pi-rule" />
           <p className="pi-desc">
-            系统化的音乐术语学习路线。每条路径按入门、进阶、高级三个阶段编排，
-            从基础概念到专业术语循序渐进。
+            系统化的音乐术语学习路线。每条路径按入门、进阶、高级三个阶段编排，从基础概念到专业术语循序渐进。
           </p>
           <div className="pi-stats">
             <div className="pi-stat">
-              <span className="pi-stat-num">{allPathNames.length}</span>
+              <span className="pi-stat-num">{pathNames.length}</span>
               <span className="pi-stat-label">学习路径</span>
             </div>
             <div className="pi-stat">
-              <span className="pi-stat-num">{totalPathEntries}</span>
+              <span className="pi-stat-num">{totalEntries}</span>
               <span className="pi-stat-label">词条总量</span>
             </div>
             <div className="pi-stat">
-              <span className="pi-stat-num">{groups.length}</span>
+              <span className="pi-stat-num">{renderedGroups.length}</span>
               <span className="pi-stat-label">知识领域</span>
             </div>
           </div>
         </div>
 
-        {groups.map((g) => (
+        {renderedGroups.map(g => (
           <section key={g.group} className="pi-group">
             <div className="pi-group-header">
               <span className="pi-group-icon">{g.icon}</span>
               <div>
                 <h2 className="pi-group-title">{g.group}</h2>
                 <p className="pi-group-meta">
-                  {g.paths.length} 条路径 · {g.paths.reduce((s, p) => s + p.total, 0)} 个词条
+                  {g.paths.length} 条路径 · {g.paths.reduce((s, p) => s + p.t, 0)} 个词条
                 </p>
               </div>
             </div>
             <div className="pi-group-paths">
-              {g.paths.map((p, pi) => {
-                const bPct = p.total > 0 ? (p.beginner / p.total * 100) : 0;
-                const iPct = p.total > 0 ? (p.intermediate / p.total * 100) : 0;
-                const aPct = p.total > 0 ? (p.advanced / p.total * 100) : 0;
-                return (
-                  <Link
-                    key={p.name}
-                    href={`/path/${encodeURIComponent(p.name)}`}
-                    className="pi-path-card"
-                  >
-                    <div className="pi-path-top">
-                      <span className="pi-path-num">{String(pi + 1).padStart(2, '0')}</span>
-                      <span className="pi-path-name">{p.name}</span>
+              {g.paths.map(p => (
+                <Link key={p.name} href={`/path/${encodeURIComponent(p.name)}`} className="pi-path-card">
+                  <div className="pi-path-top">
+                    <span className="pi-path-num">{String(p.idx + 1).padStart(2, '0')}</span>
+                    <span className="pi-path-name">{p.name}</span>
+                  </div>
+                  <div className="pi-path-bars">
+                    <div className="pi-path-bar-group">
+                      <div className="pi-path-bar" style={{ width: (p.t > 0 ? (p.b / p.t * 100) : 0) + '%', background: '#6b9080' }} />
+                      <span className="pi-path-bar-label">入门 {p.b}</span>
                     </div>
-                    <div className="pi-path-bars">
-                      <div className="pi-path-bar-group">
-                        <div className="pi-path-bar" style={{ width: `${bPct}%`, background: '#6b9080' }} />
-                        <span className="pi-path-bar-label">入门 {p.beginner}</span>
-                      </div>
-                      <div className="pi-path-bar-group">
-                        <div className="pi-path-bar" style={{ width: `${iPct}%`, background: '#a68848' }} />
-                        <span className="pi-path-bar-label">进阶 {p.intermediate}</span>
-                      </div>
-                      <div className="pi-path-bar-group">
-                        <div className="pi-path-bar" style={{ width: `${aPct}%`, background: '#8b5e3c' }} />
-                        <span className="pi-path-bar-label">高级 {p.advanced}</span>
-                      </div>
+                    <div className="pi-path-bar-group">
+                      <div className="pi-path-bar" style={{ width: (p.t > 0 ? (p.i / p.t * 100) : 0) + '%', background: '#a68848' }} />
+                      <span className="pi-path-bar-label">进阶 {p.i}</span>
                     </div>
-                    <span className="pi-path-total">{p.total} 词条</span>
-                  </Link>
-                );
-              })}
+                    <div className="pi-path-bar-group">
+                      <div className="pi-path-bar" style={{ width: (p.t > 0 ? (p.a / p.t * 100) : 0) + '%', background: '#8b5e3c' }} />
+                      <span className="pi-path-bar-label">高级 {p.a}</span>
+                    </div>
+                  </div>
+                  <span className="pi-path-total">{p.t} 词条</span>
+                </Link>
+              ))}
             </div>
           </section>
         ))}
