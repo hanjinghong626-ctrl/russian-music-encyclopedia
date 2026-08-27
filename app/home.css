@@ -1062,3 +1062,7 @@
 .pi-bar-beginner { background: #6b9080; }
 .pi-bar-intermediate { background: #a68848; }
 .pi-bar-advanced { background: #8b5e3c; }
+
+.lp-tab[data-level="beginner"][data-active="true"] { color: #6b9080; border-bottom-color: #6b9080; }
+.lp-tab[data-level="intermediate"][data-active="true"] { color: #a68848; border-bottom-color: #a68848; }
+.lp-tab[data-level="advanced"][data-active="true"] { color: #8b5e3c; border-bottom-color: #8b5e3c; }
