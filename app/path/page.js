@@ -1,9 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
-import '../../home.css';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import '../home.css';
 
 export default function PathIndexPage() {
   const [data, setData] = useState(null);
