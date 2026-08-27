@@ -167,7 +167,7 @@ function PathDetailContent() {
           {totalEntries > 0 && (
             <div className="lp-progress">
               <div className="lp-progress-bar">
-                <div className="lp-progress-fill" data-width={progressPct} />
+                <div className="lp-progress-fill" style={{ width: progressPct + "%" }} />
               </div>
               <span className="lp-progress-text">
                 已学 {totalRead}/{totalEntries} ({progressPct}%)
@@ -189,7 +189,7 @@ function PathDetailContent() {
                 role="tab"
                 aria-selected={isActive}
                 className={`lp-tab${isActive ? ' active' : ''}`}
-                data-active={isActive ? 'true' : 'false'}
+                data-active={isActive ? 'true' : 'false'} data-level={level}
                 onClick={() => handleLevelChange(level)}
               >
                 <span className="lp-tab-label">{label}</span>
