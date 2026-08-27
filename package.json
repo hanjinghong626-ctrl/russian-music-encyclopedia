@@ -1,6 +1,6 @@
 {
   "name": "russian-music-encyclopedia",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -16,5 +16,6 @@
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.3"
-  }
+  },
+  "description": "Russian Music Encyclopedia - path pages fixed"
 }
