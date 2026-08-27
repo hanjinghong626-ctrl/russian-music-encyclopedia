@@ -1040,3 +1040,25 @@
     font-size: 9px;
   }
 }
+
+/* Path index bar rows (server component version) */
+.pi-path-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pi-path-bar-track {
+  flex: 1;
+  height: 4px;
+  background: #e8e3db;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.pi-path-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+.pi-bar-beginner { background: #6b9080; }
+.pi-bar-intermediate { background: #a68848; }
+.pi-bar-advanced { background: #8b5e3c; }
