@@ -894,8 +894,19 @@
 }
 
 .pi-group-icon {
-  font-size: 22px;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: var(--gold, #a68848);
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+
+.pi-group-icon svg {
+  width: 24px;
+  height: 24px;
 }
 
 .pi-group-title {
