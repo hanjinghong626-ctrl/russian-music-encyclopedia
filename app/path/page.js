@@ -6,25 +6,25 @@ import '../home.css';
 const GROUP_ICONS = {
   "基础理论": (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="8" x2="21" y2="8"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="16" x2="21" y2="16"/><circle cx="15" cy="12" r="2.5"/><line x1="17.5" y1="12" x2="17.5" y2="5"/><path d="M17.5 5 Q21 5.5 20 8"/></svg>
-  ),,
+  ),
   "声乐": (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1.5"/><path d="M12 9 Q15 12 12 15"/><path d="M14.5 6.5 Q20 12 14.5 17.5"/><line x1="4" y1="12" x2="7" y2="12"/></svg>
-  ),,
+  ),
   "器乐": (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="19" x2="5" y2="10"/><line x1="10" y1="19" x2="10" y2="6"/><line x1="15" y1="19" x2="15" y2="8"/><line x1="20" y1="19" x2="20" y2="12"/><line x1="3" y1="19" x2="22" y2="19"/></svg>
-  ),,
+  ),
   "大型体裁": (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4 L4 20"/><path d="M20 4 L20 20"/><path d="M4 4 Q12 2 20 4"/><line x1="8" y1="20" x2="8" y2="12"/><line x1="12" y1="20" x2="12" y2="10"/><line x1="16" y1="20" x2="16" y2="12"/><line x1="4" y1="20" x2="20" y2="20"/></svg>
-  ),,
+  ),
   "合奏与机构": (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="7" cy="9" r="2.5"/><circle cx="17" cy="9" r="2.5"/><circle cx="12" cy="16" r="2.5"/><line x1="9" y1="10.5" x2="10.5" y2="14"/><line x1="15" y1="10.5" x2="13.5" y2="14"/></svg>
-  ),,
+  ),
   "历史与文化": (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5 L4 19 Q4 20 5 19 L11 16 L11 4 L5 7 Q4 7 4 5Z"/><path d="M20 5 L20 19 Q20 20 19 19 L13 16 L13 4 L19 7 Q20 7 20 5Z"/><line x1="7" y1="9" x2="9" y2="9"/><line x1="7" y1="12" x2="9" y2="12"/><line x1="15" y1="9" x2="17" y2="9"/><line x1="15" y1="12" x2="17" y2="12"/></svg>
-  ),,
+  ),
   "学术": (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 4 L22 9 L12 14 L2 9Z"/><path d="M6 11 L6 16 Q6 18 12 18 Q18 18 18 16 L18 11"/><line x1="22" y1="9" x2="22" y2="14"/></svg>
-  ),
+  )
 };
 
 const GROUPS = [
