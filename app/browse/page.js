@@ -335,17 +335,17 @@ function BrowseContent() {
                 <button role="tab" aria-selected={viewMode==='card'}
                   className={`view-tab ${viewMode === 'card' ? 'active' : ''}`}
                   onClick={() => handleViewChange('card')} title="百科视图">
-                  📖 百科
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> 百科
                 </button>
                 <button role="tab" aria-selected={viewMode==='table'}
                   className={`view-tab ${viewMode === 'table' ? 'active' : ''}`}
                   onClick={() => handleViewChange('table')} title="术语表视图">
-                  📋 术语表
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="16" rx="1"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="3" y1="16" x2="21" y2="16"/><line x1="10" y1="4" x2="10" y2="20"/><line x1="16" y1="4" x2="16" y2="20"/></svg> 术语表
                 </button>
                 <button role="tab" aria-selected={viewMode==='list'}
                   className={`view-tab ${viewMode === 'list' ? 'active' : ''}`}
                   onClick={() => handleViewChange('list')} title="列表视图">
-                  📝 列表
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg> 列表
                 </button>
               </div>
             </div>
