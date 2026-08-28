@@ -3,10 +3,33 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import '../home.css';
 
+const GROUP_ICONS = {
+  "基础理论": (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="8" x2="21" y2="8"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="16" x2="21" y2="16"/><circle cx="15" cy="12" r="2.5"/><line x1="17.5" y1="12" x2="17.5" y2="5"/><path d="M17.5 5 Q21 5.5 20 8"/></svg>
+  ),,
+  "声乐": (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1.5"/><path d="M12 9 Q15 12 12 15"/><path d="M14.5 6.5 Q20 12 14.5 17.5"/><line x1="4" y1="12" x2="7" y2="12"/></svg>
+  ),,
+  "器乐": (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="19" x2="5" y2="10"/><line x1="10" y1="19" x2="10" y2="6"/><line x1="15" y1="19" x2="15" y2="8"/><line x1="20" y1="19" x2="20" y2="12"/><line x1="3" y1="19" x2="22" y2="19"/></svg>
+  ),,
+  "大型体裁": (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4 L4 20"/><path d="M20 4 L20 20"/><path d="M4 4 Q12 2 20 4"/><line x1="8" y1="20" x2="8" y2="12"/><line x1="12" y1="20" x2="12" y2="10"/><line x1="16" y1="20" x2="16" y2="12"/><line x1="4" y1="20" x2="20" y2="20"/></svg>
+  ),,
+  "合奏与机构": (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="7" cy="9" r="2.5"/><circle cx="17" cy="9" r="2.5"/><circle cx="12" cy="16" r="2.5"/><line x1="9" y1="10.5" x2="10.5" y2="14"/><line x1="15" y1="10.5" x2="13.5" y2="14"/></svg>
+  ),,
+  "历史与文化": (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5 L4 19 Q4 20 5 19 L11 16 L11 4 L5 7 Q4 7 4 5Z"/><path d="M20 5 L20 19 Q20 20 19 19 L13 16 L13 4 L19 7 Q20 7 20 5Z"/><line x1="7" y1="9" x2="9" y2="9"/><line x1="7" y1="12" x2="9" y2="12"/><line x1="15" y1="9" x2="17" y2="9"/><line x1="15" y1="12" x2="17" y2="12"/></svg>
+  ),,
+  "学术": (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 4 L22 9 L12 14 L2 9Z"/><path d="M6 11 L6 16 Q6 18 12 18 Q18 18 18 16 L18 11"/><line x1="22" y1="9" x2="22" y2="14"/></svg>
+  ),
+};
+
 const GROUPS = [
   {
     "group": "基础理论",
-    "icon": "🎵",
     "paths": [
       {
         "name": "音阶调式与和声",
@@ -44,7 +67,6 @@ const GROUPS = [
   },
   {
     "group": "声乐",
-    "icon": "🎤",
     "paths": [
       {
         "name": "人声与声乐",
@@ -66,7 +88,6 @@ const GROUPS = [
   },
   {
     "group": "器乐",
-    "icon": "🎹",
     "paths": [
       {
         "name": "键盘乐器",
@@ -112,7 +133,6 @@ const GROUPS = [
   },
   {
     "group": "大型体裁",
-    "icon": "🎭",
     "paths": [
       {
         "name": "歌剧术语",
@@ -142,7 +162,6 @@ const GROUPS = [
   },
   {
     "group": "合奏与机构",
-    "icon": "🎻",
     "paths": [
       {
         "name": "合唱重奏与乐团",
@@ -164,7 +183,6 @@ const GROUPS = [
   },
   {
     "group": "历史与文化",
-    "icon": "📜",
     "paths": [
       {
         "name": "作曲家与音乐人物",
@@ -194,7 +212,6 @@ const GROUPS = [
   },
   {
     "group": "学术",
-    "icon": "📚",
     "paths": [
       {
         "name": "音乐教育与理论",
@@ -245,7 +262,7 @@ export default function PathIndexPage() {
           return (
             <section key={g.group} className="pi-group">
               <div className="pi-group-header">
-                <span className="pi-group-icon">{g.icon}</span>
+                <span className="pi-group-icon">{GROUP_ICONS[g.group]}</span>
                 <div>
                   <h2 className="pi-group-title">{g.group}</h2>
                   <p className="pi-group-meta">{g.paths.length} 条路径 · {groupTotal} 个词条</p>
@@ -257,28 +274,28 @@ export default function PathIndexPage() {
                   var iPct = p.t > 0 ? (p.i / p.t * 100) : 0;
                   var aPct = p.t > 0 ? (p.a / p.t * 100) : 0;
                   return (
-                    <Link key={p.name} href={"/path/" + encodeURIComponent(p.name)} className="pi-path-card">
+                    <Link key={p.name} href={'/path/' + encodeURIComponent(p.name)} className="pi-path-card">
                       <div className="pi-path-top">
-                        <span className="pi-path-num">{String(p.idx + 1).padStart(2, "0")}</span>
+                        <span className="pi-path-num">{String(p.idx + 1).padStart(2, '0')}</span>
                         <span className="pi-path-name">{p.name}</span>
                       </div>
                       <div className="pi-path-bars">
                         <div className="pi-path-bar-row">
                           <span className="pi-path-bar-label">入门 {p.b}</span>
                           <div className="pi-path-bar-track">
-                            <div className="pi-path-bar-fill pi-bar-beginner" style={{ width: bPct + "%" }} />
+                            <div className="pi-path-bar-fill pi-bar-beginner" style={{ width: bPct + '%' }} />
                           </div>
                         </div>
                         <div className="pi-path-bar-row">
                           <span className="pi-path-bar-label">进阶 {p.i}</span>
                           <div className="pi-path-bar-track">
-                            <div className="pi-path-bar-fill pi-bar-intermediate" style={{ width: iPct + "%" }} />
+                            <div className="pi-path-bar-fill pi-bar-intermediate" style={{ width: iPct + '%' }} />
                           </div>
                         </div>
                         <div className="pi-path-bar-row">
                           <span className="pi-path-bar-label">高级 {p.a}</span>
                           <div className="pi-path-bar-track">
-                            <div className="pi-path-bar-fill pi-bar-advanced" style={{ width: aPct + "%" }} />
+                            <div className="pi-path-bar-fill pi-bar-advanced" style={{ width: aPct + '%' }} />
                           </div>
                         </div>
                       </div>
