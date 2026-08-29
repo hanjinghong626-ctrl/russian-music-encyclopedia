@@ -6,6 +6,34 @@ import '../glossary.css';
 
 const PAGE_SIZE = 48;
 
+function SpeakerIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M11 5 6 9H2v6h4l5 4V5z" />
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+    </svg>
+  );
+}
+
+let ttsUtterance = null;
+function speakRussian(text, onEnd) {
+  if (!('speechSynthesis' in window)) { onEnd(null); return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ru-RU';
+  u.rate = 0.85;
+  u.pitch = 1;
+  const voices = window.speechSynthesis.getVoices();
+  const ru = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('ru'));
+  if (ru) u.voice = ru;
+  u.onend = () => { if (ttsUtterance === u) { ttsUtterance = null; onEnd(true); } };
+  u.onerror = () => { if (ttsUtterance === u) { ttsUtterance = null; onEnd(false); } };
+  ttsUtterance = u;
+  window.speechSynthesis.speak(u);
+}
+
 function BrowseContent() {
   const [data, setData] = useState(null);
   const [entries, setEntries] = useState([]);
@@ -13,6 +41,7 @@ function BrowseContent() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [activeEntry, setActiveEntry] = useState(null);
+  const [speakingId, setSpeakingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState('card');
   const [qualityFilter, setQualityFilter] = useState(null);
@@ -146,6 +175,9 @@ function BrowseContent() {
   }, []);
 
   const handleCloseDetail = useCallback(() => {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    ttsUtterance = null;
+    setSpeakingId(null);
     setActiveEntry(null);
     // Restore focus
     setTimeout(() => {
@@ -193,6 +225,28 @@ function BrowseContent() {
   const categoryTree = data?.category_tree || {};
   const categoryGroups = data?.category_groups || [];
   const stats = data?.stats || {};
+  const stopSpeaking = useCallback(() => {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    ttsUtterance = null;
+    setSpeakingId(null);
+  }, []);
+
+  const toggleSpeak = useCallback((e, ev) => {
+    if (ev) { ev.stopPropagation(); }
+    if (!e || !e.ru) return;
+    if (speakingId === e.id) { stopSpeaking(); return; }
+    setSpeakingId(e.id);
+    speakRussian(e.ru, (ok) => {
+      setSpeakingId(cur => cur === e.id ? null : cur);
+    });
+  }, [speakingId, stopSpeaking]);
+
+  useEffect(() => {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  }, []);
+
   const hasRussianDef = (e) => e.definition_ru && e.definition_ru.length > 0;
   const hasCrossRefs = (e) => e.cross_refs && e.cross_refs.length > 0;
 
@@ -371,6 +425,15 @@ function BrowseContent() {
                   >
                     <div className="entry-header">
                       <span className="entry-ru">{entry.ru}</span>
+                      <button
+                        type="button"
+                        className={`speak-btn${speakingId === entry.id ? ' speaking' : ''}`}
+                        onClick={(ev) => toggleSpeak(entry, ev)}
+                        title={speakingId === entry.id ? '停止朗读' : '朗读俄语原名'}
+                        aria-label={speakingId === entry.id ? '停止朗读' : `朗读俄语原名 ${entry.ru}`}
+                      >
+                        <SpeakerIcon />
+                      </button>
                       <span className="entry-zh">{entry.zh}</span>
                       <span className={`quality-badge quality-${entry.quality}`}>
                         {entry.quality === 'expert' ? '专家' :
@@ -451,7 +514,18 @@ function BrowseContent() {
                               tabIndex={0}
                               onKeyDown={(e) => { if (e.key === 'Enter') handleEntryClick(entry, e.currentTarget); }}
                             >
-                              <td className="col-ru">{entry.ru}</td>
+                              <td className="col-ru">
+                                <span className="cell-ru-text">{entry.ru}</span>
+                                <button
+                                  type="button"
+                                  className={`speak-btn speak-btn-sm${speakingId === entry.id ? ' speaking' : ''}`}
+                                  onClick={(ev) => toggleSpeak(entry, ev)}
+                                  title={speakingId === entry.id ? '停止朗读' : '朗读俄语原名'}
+                                  aria-label={speakingId === entry.id ? '停止朗读' : `朗读俄语原名 ${entry.ru}`}
+                                >
+                                  <SpeakerIcon />
+                                </button>
+                              </td>
                               <td className="col-zh">{entry.zh}</td>
                               <td className="col-quality">
                                 <span className={`quality-dot quality-${entry.quality}`}></span>
@@ -506,6 +580,15 @@ function BrowseContent() {
                     onClick={(e) => handleEntryClick(entry, e.currentTarget)}
                   >
                     <span className="list-ru">{entry.ru}</span>
+                    <button
+                      type="button"
+                      className={`speak-btn speak-btn-sm${speakingId === entry.id ? ' speaking' : ''}`}
+                      onClick={(ev) => toggleSpeak(entry, ev)}
+                      title={speakingId === entry.id ? '停止朗读' : '朗读俄语原名'}
+                      aria-label={speakingId === entry.id ? '停止朗读' : `朗读俄语原名 ${entry.ru}`}
+                    >
+                      <SpeakerIcon />
+                    </button>
                     <span className="list-zh">{entry.zh}</span>
                     <span className="list-cat">{entry.category_zh}</span>
                     <span className={`quality-dot quality-${entry.quality}`}></span>
@@ -563,7 +646,18 @@ function BrowseContent() {
             </button>
 
             <div className="detail-header">
-              <h2 className="detail-ru" id={`entry-title-${activeEntry.id}`}>{activeEntry.ru}</h2>
+              <div className="detail-title-row">
+                <h2 className="detail-ru" id={`entry-title-${activeEntry.id}`}>{activeEntry.ru}</h2>
+                <button
+                  type="button"
+                  className={`speak-btn speak-btn-lg${speakingId === activeEntry.id ? ' speaking' : ''}`}
+                  onClick={(ev) => toggleSpeak(activeEntry, ev)}
+                  title={speakingId === activeEntry.id ? '停止朗读' : '朗读俄语原名'}
+                  aria-label={speakingId === activeEntry.id ? '停止朗读' : `朗读俄语原名 ${activeEntry.ru}`}
+                >
+                  <SpeakerIcon />
+                </button>
+              </div>
               <h3 className="detail-zh">{activeEntry.zh}</h3>
               <div className="detail-meta">
                 <button
