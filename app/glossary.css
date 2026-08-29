@@ -739,3 +739,56 @@ body.modal-open { overflow: hidden; }
   .qf-btn, .category-btn, .group-btn { min-height: 40px; }
   .view-tab { min-height: 38px; }
 }
+
+/* ===== 俄语发音按钮 ===== */
+.speak-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid rgba(26, 26, 26, 0.14);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  color: rgba(26, 26, 26, 0.55);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.speak-btn:hover {
+  color: #a68848;
+  border-color: rgba(166, 136, 72, 0.55);
+  background: rgba(166, 136, 72, 0.08);
+}
+.speak-btn.speaking {
+  color: #ffffff;
+  background: #a68848;
+  border-color: #a68848;
+  animation: speak-pulse 1.2s ease-in-out infinite;
+}
+@keyframes speak-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(166, 136, 72, 0.35); }
+  50% { box-shadow: 0 0 0 5px rgba(166, 136, 72, 0); }
+}
+.speak-btn-sm { width: 22px; height: 22px; }
+.speak-btn-sm svg { width: 12px; height: 12px; }
+.speak-btn-lg { width: 38px; height: 38px; margin-left: 12px; }
+.speak-btn-lg svg { width: 20px; height: 20px; }
+.entry-header .speak-btn { margin-right: 2px; }
+.detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.detail-title-row .detail-ru { margin: 0; }
+.col-ru { white-space: nowrap; }
+.cell-ru-text { vertical-align: middle; }
+.col-ru .speak-btn-sm {
+  vertical-align: middle;
+  margin-left: 6px;
+}
+.list-item .speak-btn-sm { margin: 0 2px; }
+@media (max-width: 640px) {
+  .speak-btn-lg { width: 34px; height: 34px; }
+}
