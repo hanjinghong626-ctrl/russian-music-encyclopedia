@@ -6,6 +6,33 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import '../../home.css';
 
+function SpeakerIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M11 5 6 9H2v6h4l5 4V5z" />
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+    </svg>
+  );
+}
+
+let ttsUtterance = null;
+function speakRussian(text, onEnd) {
+  if (!('speechSynthesis' in window)) { onEnd(null); return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ru-RU';
+  u.rate = 0.85;
+  const voices = window.speechSynthesis.getVoices();
+  const ru = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('ru'));
+  if (ru) u.voice = ru;
+  u.onend = () => { if (ttsUtterance === u) { ttsUtterance = null; onEnd(true); } };
+  u.onerror = () => { if (ttsUtterance === u) { ttsUtterance = null; onEnd(false); } };
+  ttsUtterance = u;
+  window.speechSynthesis.speak(u);
+}
+
 const levelLabels = {
   beginner: { label: '入门', cyr: 'Начальный', color: '#6b9080' },
   intermediate: { label: '进阶', cyr: 'Средний', color: '#a68848' },
@@ -20,6 +47,31 @@ function PathDetailContent() {
   const [expandedIds, setExpandedIds] = useState(new Set());
   const [readIds, setReadIds] = useState(new Set());
   const [searchTerm, setSearchTerm] = useState('');
+  const [speakingId, setSpeakingId] = useState(null);
+
+  const stopSpeaking = useCallback(() => {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    ttsUtterance = null;
+    setSpeakingId(null);
+  }, []);
+
+  const toggleSpeak = useCallback((entry, ev) => {
+    ev.stopPropagation();
+    if (!entry || !entry.ru) return;
+    const eid = String(entry.id);
+    if (speakingId === eid) { stopSpeaking(); return; }
+    setSpeakingId(eid);
+    speakRussian(entry.ru, () => {
+      setSpeakingId(cur => cur === eid ? null : cur);
+    });
+  }, [speakingId, stopSpeaking]);
+
+  useEffect(() => {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.getVoices();
+    return () => { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); };
+  }, []);
+
 
   useEffect(() => {
     fetch('/data/encyclopedia_unified.json')
@@ -251,6 +303,14 @@ function PathDetailContent() {
                       <span className="lp-card-ru">{entry.ru}</span>
                     </div>
                     <div className="lp-card-actions">
+                      <button
+                        className={`speak-btn speak-btn-sm${speakingId === entryId ? ' speaking' : ''}`}
+                        onClick={(e) => toggleSpeak(entry, e)}
+                        title={speakingId === entryId ? '停止朗读' : '朗读俄语原名'}
+                        aria-label={speakingId === entryId ? '停止朗读' : `朗读俄语原名 ${entry.ru}`}
+                      >
+                        <SpeakerIcon />
+                      </button>
                       <button
                         className={`lp-check-btn${isRead ? ' checked' : ''}`}
                         onClick={e => { e.stopPropagation(); toggleRead(entryId); }}
