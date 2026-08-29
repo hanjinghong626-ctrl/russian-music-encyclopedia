@@ -1084,3 +1084,38 @@
 .lp-tab[data-level="beginner"][data-active="true"] { color: #6b9080; border-bottom-color: #6b9080; }
 .lp-tab[data-level="intermediate"][data-active="true"] { color: #a68848; border-bottom-color: #a68848; }
 .lp-tab[data-level="advanced"][data-active="true"] { color: #8b5e3c; border-bottom-color: #8b5e3c; }
+
+/* ===== 俄语发音按钮（学习路径页） ===== */
+.speak-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid rgba(26, 26, 26, 0.14);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  color: rgba(26, 26, 26, 0.55);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.speak-btn:hover {
+  color: #a68848;
+  border-color: rgba(166, 136, 72, 0.55);
+  background: rgba(166, 136, 72, 0.08);
+}
+.speak-btn.speaking {
+  color: #ffffff;
+  background: #a68848;
+  border-color: #a68848;
+  animation: speak-pulse 1.2s ease-in-out infinite;
+}
+@keyframes speak-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(166, 136, 72, 0.35); }
+  50% { box-shadow: 0 0 0 5px rgba(166, 136, 72, 0); }
+}
+.speak-btn-sm { width: 22px; height: 22px; }
+.speak-btn-sm svg { width: 12px; height: 12px; }
+.lp-card-actions .speak-btn { margin-right: 6px; }
