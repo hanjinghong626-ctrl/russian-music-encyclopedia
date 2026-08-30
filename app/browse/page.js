@@ -187,6 +187,29 @@ function BrowseContent() {
     }, 50);
   }, []);
 
+  const stopSpeaking = useCallback(() => {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    ttsUtterance = null;
+    setSpeakingId(null);
+  }, []);
+
+  const toggleSpeak = useCallback((e, ev) => {
+    if (ev) { ev.stopPropagation(); }
+    if (!e || !e.ru) return;
+    if (speakingId === e.id) { stopSpeaking(); return; }
+    setSpeakingId(e.id);
+    speakRussian(e.ru, (ok) => {
+      setSpeakingId(cur => cur === e.id ? null : cur);
+    });
+  }, [speakingId, stopSpeaking]);
+
+  useEffect(() => {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  }, []);
+
+
   // Escape key + body scroll lock for modal
   useEffect(() => {
     if (!activeEntry) return;
@@ -225,28 +248,6 @@ function BrowseContent() {
   const categoryTree = data?.category_tree || {};
   const categoryGroups = data?.category_groups || [];
   const stats = data?.stats || {};
-  const stopSpeaking = useCallback(() => {
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-    ttsUtterance = null;
-    setSpeakingId(null);
-  }, []);
-
-  const toggleSpeak = useCallback((e, ev) => {
-    if (ev) { ev.stopPropagation(); }
-    if (!e || !e.ru) return;
-    if (speakingId === e.id) { stopSpeaking(); return; }
-    setSpeakingId(e.id);
-    speakRussian(e.ru, (ok) => {
-      setSpeakingId(cur => cur === e.id ? null : cur);
-    });
-  }, [speakingId, stopSpeaking]);
-
-  useEffect(() => {
-    if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.getVoices();
-    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-  }, []);
-
   const hasRussianDef = (e) => e.definition_ru && e.definition_ru.length > 0;
   const hasCrossRefs = (e) => e.cross_refs && e.cross_refs.length > 0;
 
