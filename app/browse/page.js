@@ -418,11 +418,14 @@ function BrowseContent() {
                 </div>
               ) : (
                 visibleEntries.map(entry => (
-                  <button
+                  <div
                     key={entry.id}
                     id={`entry-${entry.id}`}
+                    role="button"
+                    tabIndex={0}
                     className={`entry-card quality-${entry.quality} ${activeEntry?.id === entry.id ? 'active' : ''}`}
                     onClick={(e) => handleEntryClick(entry, e.currentTarget)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleEntryClick(entry, e.currentTarget); } }}
                   >
                     <div className="entry-header">
                       <span className="entry-ru">{entry.ru}</span>
@@ -456,10 +459,11 @@ function BrowseContent() {
                             const refEntry = getEntryById[refId];
                             if (!refEntry) return null;
                             return (
-                              <button key={refId} className="ref-tag"
-                                onClick={(e) => { e.stopPropagation(); navigateToEntry(refId); }}>
+                              <span key={refId} role="button" tabIndex={0} className="ref-tag"
+                                onClick={(e) => { e.stopPropagation(); navigateToEntry(refId); }}
+                                onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); navigateToEntry(refId); } }}>
                                 {refEntry.zh}
-                              </button>
+                              </span>
                             );
                           })}
                           {entry.cross_refs.length > 6 && (
@@ -478,7 +482,7 @@ function BrowseContent() {
                         </span>
                       </div>
                     )}
-                  </button>
+                  </div>
                 ))
               )}
             </div>
@@ -576,9 +580,12 @@ function BrowseContent() {
                 <div className="no-results"><p>未找到匹配的词条</p></div>
               ) : (
                 visibleEntries.map(entry => (
-                  <button key={entry.id}
+                  <div key={entry.id}
+                    role="button"
+                    tabIndex={0}
                     className={`list-item quality-${entry.quality}`}
                     onClick={(e) => handleEntryClick(entry, e.currentTarget)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleEntryClick(entry, e.currentTarget); } }}
                   >
                     <span className="list-ru">{entry.ru}</span>
                     <button
@@ -593,7 +600,7 @@ function BrowseContent() {
                     <span className="list-zh">{entry.zh}</span>
                     <span className="list-cat">{entry.category_zh}</span>
                     <span className={`quality-dot quality-${entry.quality}`}></span>
-                  </button>
+                  </div>
                 ))
               )}
             </div>
